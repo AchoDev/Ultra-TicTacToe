@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 void main() {
@@ -134,19 +136,95 @@ class GameScreen extends StatefulWidget {
 
 class _GameScreenState extends State<GameScreen> {
 
+  void checkWinner() {
+    final List<int> currentLayout = List.empty(growable: true);
+    for(int i = 0; i < 9; i++) {
+      currentLayout.add(fieldKeys[i].currentState!.checkedBy);
+    }
 
+    print(currentLayout);
+
+    bool _checkSingleMove(List<int> move, int checkEnemy) {
+      int counter = 0;
+      for(int j = 0; j < 9; j++) {
+        if(currentLayout[j] == 1 + checkEnemy && move[j] == 1) counter++;
+      } 
+      return counter == 3;
+    }
+
+    for(List<int> winningMove in winningMoves) {
+      if(_checkSingleMove(winningMove, 0)) {
+        setState(() {
+          winner = 1;
+        });
+      }
+
+      if(_checkSingleMove(winningMove, 1)) {
+        setState(() {
+          winner = 2;
+        });
+      }
+    }
+  }
+
+  List<List<int>> winningMoves = [
+      [ 1, 1, 1,
+        0, 0, 0,
+        0, 0, 0, ],
+      
+      [ 0, 0, 0,
+        1, 1, 1,
+        0, 0, 0, ],
+      
+      [ 0, 0, 0,
+        0, 0, 0,
+        1, 1, 1, ],
+
+      [ 1, 0, 0,
+        1, 0, 0,
+        1, 0, 0, ],
+      
+      [ 0, 1, 0,
+        0, 1, 0,
+        0, 1, 0, ],
+      
+      [ 0, 0, 1,
+        0, 0, 1,
+        0, 0, 1, ],
+
+      [ 1, 0, 0,
+        0, 1, 0,
+        0, 0, 1, ],
+
+      [ 0, 0, 1,
+        0, 1, 0,
+        1, 0, 0, ],
+    ];
 
   bool yourTurn = true;
-  int currentField = 2;
+  int currentField = 9;
+
+  int winner = 0;
 
   void checkField(int globalPosition, int localPosition) {
-    setState(() => yourTurn = false);
+    setState(() {
+      yourTurn = false;
+
+      if(fieldKeys[localPosition].currentState!.checked) currentField = 9;
+      else currentField = localPosition;
+    });
 
     print('checked position g: $globalPosition l: $localPosition');
   }
 
   void enemyCheckField(int globalPosition, int localPosition) {
-    setState(() => yourTurn = true);
+     setState(() {
+      yourTurn = true;
+
+      if(fieldKeys[localPosition].currentState!.checked) currentField = 9;
+      else currentField = localPosition;
+    });
+
     print('enemy checked pos');
     fieldKeys[globalPosition].currentState?.crossEnemyField(localPosition);
   }
@@ -160,56 +238,102 @@ class _GameScreenState extends State<GameScreen> {
     super.initState();
 
     fieldKeys = List.generate(9, (index) => GlobalObjectKey<_SmallTTTFieldState>(index));
-
-    Color borderColor = const Color.fromARGB(255, 218, 218, 218);
-
-    fields = [
-      for(int i = 0; i < 9; i++)
-        Container(
-          decoration: BoxDecoration(
-            color: currentField == 9 || currentField == i ? Colors.red : Colors.grey,
-            border: Border(
-              right: i == 2 || i == 5 || i == 8 ? BorderSide.none : BorderSide(width: 10, color: borderColor),
-              top: i == 0 || i == 1 || i == 2 ? BorderSide.none : BorderSide(width: 10, color: borderColor)
-            )
-          ),
-          child: SmallTTTField(
-            key: fieldKeys[i],
-            checkField: checkField,
-            localPosition: i,
-            currentlySelected: currentField == 9 || currentField == i,
-          )
-        )
-    ];
   }
 
   @override
   Widget build(BuildContext context) {
+
+    Color borderColor = const Color.fromARGB(255, 218, 218, 218);
+
     return Scaffold(
       body: SizedBox(
         width: double.infinity,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
+        child: Stack(
           children: [
 
-            ElevatedButton(
-              onPressed: () => enemyCheckField(2, 4), 
-              child: Text('enemy checks 2, 4')
-            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
 
-            Text('ULTRA TIC TAC TOE'),
-            Text('[[USERNAME]] vs [[ENEMY USERNAME]]'),
-            IgnorePointer(
-              ignoring: !yourTurn,
-              child: ConstrainedBox(
-                constraints: BoxConstraints.tight(const Size(700, 700)),
-                child: GridView.count(
-                  crossAxisCount: 3,
-                  children: fields
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () => enemyCheckField(currentField != 9 ? currentField : Random().nextInt(8), Random().nextInt(8)),
+                      child: Text('enemy checks random')
+                    ),
+                    ElevatedButton(
+                      onPressed: () => enemyCheckField(1, 6),
+                      child: Text('enemy checks 1, 6')
+                    ),
+                    ElevatedButton(
+                      onPressed: () => enemyCheckField(1, 4),
+                      child: Text('enemy checks 1, 4')
+                    ),
+                    ElevatedButton(
+                      onPressed: () => enemyCheckField(1, 2),
+                      child: Text('enemy checks 1, 2')
+                    ),
+                  ],
+                ),
+
+                Text('ULTRA TIC TAC TOE'),
+                Text('[[USERNAME]] vs [[ENEMY USERNAME]]'),
+                IgnorePointer(
+                  ignoring: !yourTurn,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints.tight(const Size(700, 700)),
+                    child: GridView.count(
+                      crossAxisCount: 3,
+                      children: [
+                        for(int i = 0; i < 9; i++)
+                          Container(
+                            decoration: BoxDecoration(
+                              color: currentField == 9 || currentField == i ? Colors.red : Colors.grey,
+                              border: Border(
+                                right: i == 2 || i == 5 || i == 8 ? BorderSide.none : BorderSide(width: 10, color: borderColor),
+                                top: i == 0 || i == 1 || i == 2 ? BorderSide.none : BorderSide(width: 10, color: borderColor)
+                              )
+                            ),
+                            child: SmallTTTField(
+                              key: fieldKeys[i],
+                              checkField: checkField,
+                              checkGlobalWinner: checkWinner,
+
+                              localPosition: i,
+                              currentlySelected: currentField == 9 || currentField == i,
+
+                              checkedWidget: const Icon(Icons.close_rounded, size: 200,),
+                              enemyCheckedWidget: const Icon(Icons.circle_outlined, size: 200,),
+
+                              winningMoves: winningMoves,
+                            )
+                          )
+                      ]
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          
+            Visibility(
+              visible: winner != 0,
+              child: Container(
+                width: double.infinity,
+                height: double.infinity,
+                color: Color.fromARGB(214, 76, 175, 79),
+                child: Center(
+                  child: Text(
+                    '${winner == 1 ? 'Player' : 'Enemy'} won the game!',
+                    style: TextStyle(
+                      fontSize: 60
+                    ),
+                  ),
                 ),
               ),
-            ),
+            )
+
           ],
         ),
       ),
@@ -221,13 +345,27 @@ class SmallTTTField extends StatefulWidget {
   const SmallTTTField({
     super.key,
     required this.checkField,
+    required this.checkGlobalWinner,
+
     required this.localPosition,
     required this.currentlySelected,
+
+    required this.checkedWidget,
+    required this.enemyCheckedWidget,
+
+    required this.winningMoves,
   });
 
   final int localPosition;
   final Function checkField;
+  final Function checkGlobalWinner;
+
   final bool currentlySelected;
+
+  final Widget checkedWidget;
+  final Widget enemyCheckedWidget;
+
+  final List<List<int>> winningMoves;
 
   @override
   State<SmallTTTField> createState() => _SmallTTTFieldState();
@@ -235,8 +373,44 @@ class SmallTTTField extends StatefulWidget {
 
 class _SmallTTTFieldState extends State<SmallTTTField> {
 
+  bool checked = false;
+  int checkedBy = 0;
+
   void crossEnemyField(position) {
     buttonKeys[position].currentState?.checkEnemyMark();
+    checkWinner();
+    widget.checkGlobalWinner();
+  }
+
+  void checkWinner() {
+    final List<int> currentLayout = List.empty(growable: true);
+    for(int i = 0; i < 9; i++) {
+      currentLayout.add(buttonKeys[i].currentState!.selectedBy);
+    }
+
+    bool _checkSingleMove(List<int> move, int checkEnemy) {
+      int counter = 0;
+      for(int j = 0; j < 9; j++) {
+        if(currentLayout[j] == 1 + checkEnemy && move[j] == 1) counter++;
+      } 
+      return counter == 3;
+    }
+
+    for(List<int> winningMove in widget.winningMoves) {
+      if(_checkSingleMove(winningMove, 0)) {
+        setState(() {
+          checked = true;
+          checkedBy = 1;
+        });
+      }
+
+      if(_checkSingleMove(winningMove, 1)) {
+        setState(() {
+          checked = true;
+          checkedBy = 2;
+        });
+      }
+    }
   }
 
   late List<SmallTTTFieldButton> buttons;
@@ -259,6 +433,11 @@ class _SmallTTTFieldState extends State<SmallTTTField> {
           checkPosition: (pos) {
             widget.checkField(widget.localPosition, pos);
           },
+
+          checkWinner: () {
+            checkWinner(); 
+            widget.checkGlobalWinner();
+          }
         )
     ];
   }
@@ -269,14 +448,32 @@ class _SmallTTTFieldState extends State<SmallTTTField> {
     double borderWidth = 4;
 
     return IgnorePointer(
-      ignoring: !widget.currentlySelected,
+      ignoring: !widget.currentlySelected || checked,
       child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(5),
-          child: GridView.count(
-            crossAxisCount: 3,
-            children: buttons
-          ),
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(5),
+              child: GridView.count(
+                crossAxisCount: 3,
+                children: buttons
+              ),
+            ),
+
+            Align(
+              alignment: Alignment.center,
+              child: Visibility(
+                visible: checked,
+                child: Container(
+                  width: double.infinity,
+                  height: double.infinity,
+
+                  color: Color.fromARGB(206, 158, 158, 158),
+                  child: checkedBy == 1 ? widget.checkedWidget : widget.enemyCheckedWidget,
+                )
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -291,6 +488,7 @@ class SmallTTTFieldButton extends StatefulWidget {
     required this.selectedChild,
     required this.enemySelectedChild,
 
+    required this.checkWinner,
   });
 
 
@@ -298,6 +496,8 @@ class SmallTTTFieldButton extends StatefulWidget {
   final Widget enemySelectedChild;
   final Function checkPosition;
   final int localPosition;
+
+  final Function checkWinner;
 
   @override
   State<SmallTTTFieldButton> createState() => _SmallTTTFieldButtonState();
@@ -311,7 +511,6 @@ class _SmallTTTFieldButtonState extends State<SmallTTTFieldButton> {
   int selectedBy = 0;
 
   void checkEnemyMark() {
-    print('selected saaaaaa');
     setState(() {
       selected = true;
       selectedBy = 2;
@@ -321,11 +520,14 @@ class _SmallTTTFieldButtonState extends State<SmallTTTFieldButton> {
   void checkMark() {
     if(selected) return;
 
+
     setState(() {
       widget.checkPosition(widget.localPosition);
       selected = true;
       selectedBy = 1;
     });
+
+    widget.checkWinner();
   }
 
   @override
