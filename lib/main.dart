@@ -153,11 +153,13 @@ class _GameScreenState extends State<GameScreen> {
 
   late List<Container> fields;
 
-  final List<GlobalObjectKey<_SmallTTTFieldState>> fieldKeys = List.generate(9, (index) => GlobalObjectKey<_SmallTTTFieldState>(index));
+  late final List<GlobalObjectKey<_SmallTTTFieldState>> fieldKeys;
 
   @override
   void initState() {
     super.initState();
+
+    fieldKeys = List.generate(9, (index) => GlobalObjectKey<_SmallTTTFieldState>(index));
 
     Color borderColor = const Color.fromARGB(255, 218, 218, 218);
 
@@ -238,11 +240,14 @@ class _SmallTTTFieldState extends State<SmallTTTField> {
   }
 
   late List<SmallTTTFieldButton> buttons;
-  late List<GlobalObjectKey<_SmallTTTFieldButtonState>> buttonKeys = List.generate(9, (index) => GlobalObjectKey<_SmallTTTFieldButtonState>(index + 20));
+  late List<GlobalObjectKey<_SmallTTTFieldButtonState>> buttonKeys;
 
   @override
   void initState() {
     super.initState();
+
+    buttonKeys = List.generate(9, (index) => GlobalObjectKey<_SmallTTTFieldButtonState>(index + (widget.localPosition * 10)));
+
     buttons = [
       for(int i = 0; i < 9; i++)
         SmallTTTFieldButton(
@@ -285,7 +290,9 @@ class SmallTTTFieldButton extends StatefulWidget {
     required this.checkPosition,
     required this.selectedChild,
     required this.enemySelectedChild,
+
   });
+
 
   final Widget selectedChild;
   final Widget enemySelectedChild;
@@ -323,6 +330,7 @@ class _SmallTTTFieldButtonState extends State<SmallTTTFieldButton> {
 
   @override
   Widget build(BuildContext context) {
+
     return Container(
       margin: EdgeInsets.all(1),
       width: 5,
