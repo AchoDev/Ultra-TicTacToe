@@ -1,55 +1,50 @@
 const express = require('express')
 const http = require('http')
-const socketio = require('socket.io')(http)
+
+const socketio = require('socket.io')
 
 const app = express()
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 8000
 
 let server = http.createServer(app)
 
+const io = socketio(server)
+
 app.use(express.json())
 
-// let clientResponseRef
-// app.get('/*', (req, res) => {
-//     const pathname = url.parse(req.url).pathname
+const players = []
 
-//     const obj = {
-//         'pathname': pathname,
-//         'method': 'get',
-//         'params': req.body
-//     }
+let gameStarted = false;
 
-//     socketio.emit('page-request', obj)
+io.on('connection', (socket) => {
 
-//     clientResponseRef = res
-// })
+    // socket.disconnect()
 
-// app.post('/*', (req, res) => {
-//     const pathname = url.parse(req.url).pathname
+    // const userID = Math.floor(Math.random() * 100000000)
 
-//     const obj = {
-//         'pathname': pathname,
-//         'method': 'post',
-//         'params': req.query
-//     }
-
-//     socketio.emit('page-request', obj)
-
-//     clientResponseRef = res
-// })
-
-socketio.on('connection', (socket) => {
     console.log('Player connected')
-    socket.on('playermove', (response) => {
-        
+    socket.on('playermove', (res) => {
+        console.log(res)
+        io.emit('playermove', res)
+    })
+
+    socket.on('joinlobby', (res) => {
+        players.push(socket)
+        socket.emit('joinlobbyresponse', players.length)
+        io.emit('userjoinedlobby', res)
+    })
+
+    socket.on('startgame', (res) => {
+        if(socket == players[0]) io.emit('hoststartgame')
+    })
+
+    socket.on('disconnect', (socket) => {
+        io.emit('playerleft')
     })
 })
 
-socketio.on('disconnect', (socket) => {
-    console.log('Player disconnected')
-})
 
-server.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, () => {
     console.log('Server started and running on port ' + PORT.toString())
 })
 
