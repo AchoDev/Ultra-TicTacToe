@@ -1,7 +1,10 @@
 import 'dart:math';
+import 'package:flutter/gestures.dart';
 import 'package:ultra_tictactoe/SocketClient.dart';
 
 import 'Lobby.dart';
+
+import 'package:vector_math/vector_math_64.dart' as vm;
 
 import 'package:flutter/material.dart';
 
@@ -37,35 +40,78 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
+  int currentPage = 1;
+
+  void changePage(int newPage) {
+    setState(() => currentPage = newPage);
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SizedBox(
-        width: double.infinity,
+    Duration transitionDuration = const Duration(milliseconds: 500);
+    Curve transitionCurve = Curves.easeInOutBack;
 
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
+    // double currentTranslation = MediaQuery.of(context).size.width * currentPage;
+
+    return Scaffold(
+      body: AnimatedContainer(
+        width: 500,
+        duration: transitionDuration,
+        curve: transitionCurve,
+
+        // transform: Matrix4.identity()..setTranslation(vm.Vector3(currentTranslation, 0, 0)),
+
+        child: Stack(
           children: [
-            Text('Ultra TicTacToe'),
       
-            Text('Made by AchoDev'),
+            Flexible(
+
+              // width: MediaQuery.of(context).size.width,
       
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => JoinServerScreen())
-              ), 
-              child: Text('Join Server')
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+      
+                  Logo(),
+            
+                  ElevatedButton(
+                    onPressed: () => setState(() => currentPage = 2,),
+                    child: Text('Join Server')
+                  ),
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => SetupScreen())
+                    ), 
+                    child: Text('How to set up server')
+                  ),
+                ],
+              ),
+      
             ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => SetupScreen())
-              ), 
-              child: Text('How to set up server')
-            ),
+      
+            JoinServerScreen(changePage: changePage,),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class Logo extends StatelessWidget {
+  const Logo({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Flexible(
+      child: FractionallySizedBox(
+        heightFactor: 0.6,
+        child: Image(image: AssetImage('images/logo.png'))
       ),
     );
   }
@@ -94,7 +140,10 @@ class SetupScreen extends StatelessWidget {
 class JoinServerScreen extends StatelessWidget {
   const JoinServerScreen({
     super.key,
+    required this.changePage
   });
+
+  final Function changePage;
 
   @override
   Widget build(BuildContext context) {
@@ -103,33 +152,41 @@ class JoinServerScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(),
-      body: Column(
-        children: [
-          Text('Join Server'),
-    
-          TextField(
-            controller: TextEditingController(text: username),
-            decoration: InputDecoration(
-              hintText: 'Enter Username',
-            ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => changePage(2)
+      ),
+      body: Flexible(
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width,
+          child: Column(
+            children: [
+              Text('Join Server'),
+            
+              TextField(
+                controller: TextEditingController(text: username),
+                decoration: InputDecoration(
+                  hintText: 'Enter Username',
+                ),
+              ),
+              TextField(
+                decoration: InputDecoration(
+                  hintText: 'URL'
+                ),
+              ),
+        
+              ElevatedButton(
+                onPressed: () {
+        
+                  
+                  SocketClient.joinLocalLobby(username);
+        
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => Lobby()));
+                }, 
+                child: Text('Join')
+              )
+            ],
           ),
-          TextField(
-            decoration: InputDecoration(
-              hintText: 'URL'
-            ),
-          ),
-
-          ElevatedButton(
-            onPressed: () {
-
-              
-              SocketClient.joinLocalLobby(username);
-
-              Navigator.of(context).push(MaterialPageRoute(builder: (context) => Lobby()));
-            }, 
-            child: Text('Join')
-          )
-        ],
+        ),
       ),
     );
   }
