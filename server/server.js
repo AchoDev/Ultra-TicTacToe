@@ -35,7 +35,9 @@ io.on('connection', (socket) => {
     })
 
     socket.on('startgame', (res) => {
-        if(socket == players[0]) io.emit('hoststartgame')
+        console.log(socket)
+
+        if(socket == players[0]['socket']) io.emit('hoststartgame')
     })
 
     socket.on('disconnect', (socket) => {

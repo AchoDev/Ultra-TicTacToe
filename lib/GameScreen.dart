@@ -92,8 +92,6 @@ class _GameScreenState extends State<GameScreen> {
   int winner = 0;
 
   void checkField(int globalPosition, int localPosition) {
-
-
     setState(() {
       
       yourTurn = false;
