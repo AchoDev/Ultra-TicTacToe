@@ -144,8 +144,6 @@ class _GameScreenState extends State<GameScreen> {
     });
 
     fieldKeys = List.generate(9, (index) => GlobalObjectKey<SmallTTTFieldState>(index));
-
-    client.SocketClient.connect();
   }
 
   @override

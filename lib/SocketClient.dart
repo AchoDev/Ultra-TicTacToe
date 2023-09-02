@@ -6,10 +6,10 @@ import 'package:socket_io_client/socket_io_client.dart' as io;
 class SocketClient {
   static io.Socket? _socket;
 
-  static void connect([Function? callBack]) {
-
+  static void connect(String ip, [Function? callBack]) {
+    print('ip: $ip');
     if(_socket == null) {
-      _socket = io.io('http://localhost:8000', <String, dynamic>{
+      _socket = io.io('http://$ip:8000', <String, dynamic>{
         'transports': ['websocket'],
       });
 
@@ -40,8 +40,8 @@ class SocketClient {
     _socket!.emit('startgame');
   }
 
-  static void joinLocalLobby(String username) {
-    if(_socket == null) connect();
+  static void joinLocalLobby(String username, String ip) {
+    if(_socket == null) connect(ip);
     _socket!.emit('joinlobby', {'data': username});
   }
 }

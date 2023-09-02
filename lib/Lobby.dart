@@ -39,26 +39,54 @@ class _LobbyState extends State<Lobby> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
-      body: Column(
-        children: [
-          for(int i = 0; i < playercount; i++)
-            Container(
-              margin: EdgeInsets.all(20),
-              color: Colors.green,
-              height: 100,
-              width: 200,
-              child: Text('PLAYER'),
+      
+      body: SizedBox(
+
+        width: MediaQuery.sizeOf(context).width,
+        height: MediaQuery.sizeOf(context).height,
+
+        child: Column(
+          children: [
+            Row(
+              children: [
+                _Player(username: 'generic username'),
+                _Player(username: 'beautiful name :)')
+              ],
             ),
-        
-          ElevatedButton(
-            onPressed: () {
-              SocketClient.startGame();
-            }, 
-            child: Text('START GAME (IF YOURE HOST)')
-          )
-        ],
+          
+            ElevatedButton(
+              onPressed: () {
+                SocketClient.startGame();
+              }, 
+              child: Text('START GAME (IF YOURE HOST)')
+            )
+          ],
+        ),
       ),
+    );
+  }
+}
+
+class _Player extends StatelessWidget {
+  const _Player({
+    super.key,
+    required this.username,
+  });
+
+  final String username;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.all(10),
+        height: 700,
+        color: Colors.green.withOpacity(.7),
+      
+        child: Center(
+          child: Text(username),
+        ),
+      )
     );
   }
 }

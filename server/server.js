@@ -29,7 +29,7 @@ io.on('connection', (socket) => {
     })
 
     socket.on('joinlobby', (res) => {
-        players.push(socket)
+        players.push({'socket': socket, 'username': res})
         socket.emit('joinlobbyresponse', players.length)
         io.emit('userjoinedlobby', res)
     })
