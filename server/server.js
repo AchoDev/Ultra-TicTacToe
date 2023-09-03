@@ -3,6 +3,8 @@ const http = require('http')
 
 const socketio = require('socket.io')
 
+const { onExit } = require('signal-exit')
+
 const app = express()
 const PORT = process.env.PORT || 8000
 
@@ -13,8 +15,6 @@ const io = socketio(server)
 app.use(express.json())
 
 const players = []
-
-let gameStarted = false;
 
 io.on('connection', (socket) => {
 
@@ -42,11 +42,23 @@ io.on('connection', (socket) => {
 
     socket.on('disconnect', (socket) => {
         io.emit('playerleft')
+
+        server.close();
     })
 })
 
 
+
+
 server.listen(PORT, () => {
+    console.log('START');
     console.log('Server started and running on port ' + PORT.toString())
 })
+
+onExit((code, signal) => {
+    console.log('exit aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+
+    server.close()
+})
+
 

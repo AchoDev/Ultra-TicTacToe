@@ -7,7 +7,10 @@ import 'GameScreen.dart';
 class Lobby extends StatefulWidget {
   const Lobby({
     super.key,
+    required this.changePage
   });
+
+  final Function(int, int) changePage;
 
   @override
   State<Lobby> createState() => _LobbyState();
@@ -17,51 +20,54 @@ class _LobbyState extends State<Lobby> {
 
   int playercount = 0;
 
+  bool listening = false;
+
   @override
   void initState() {
     super.initState();
-  
+  }
+
+  void listenForServer() {
+    listening = true;
     SocketClient.listenFor('hoststartgame', (p0) => Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => GameScreen())
+      MaterialPageRoute(builder: (context) => const GameScreen())
     ));
 
     SocketClient.listenFor('joinlobbyresponse', (p0) {
       print(p0);
-      if(mounted) setState(() => playercount += (p0 - 1) as int);
+      if(mounted) setState(() => playercount = (p0 - 1) as int);
     });
 
     SocketClient.listenFor('userjoinedlobby', (p1) {
       if(mounted) setState(() => playercount++);
     });
-
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      
-      body: SizedBox(
 
-        width: MediaQuery.sizeOf(context).width,
-        height: MediaQuery.sizeOf(context).height,
+    if(!listening) listenForServer();
 
-        child: Column(
-          children: [
-            Row(
-              children: [
-                _Player(username: 'generic username'),
-                _Player(username: 'beautiful name :)')
-              ],
-            ),
-          
-            ElevatedButton(
-              onPressed: () {
-                SocketClient.startGame();
-              }, 
-              child: Text('START GAME (IF YOURE HOST)')
-            )
-          ],
-        ),
+    return SizedBox(
+      width: MediaQuery.sizeOf(context).width,
+      height: MediaQuery.sizeOf(context).height,
+
+      child: Column(
+        children: [
+          Row(
+            children: [
+              for(int i = 0; i < playercount; i++)
+                const _Player(username: 'beautiful name :)')
+            ],
+          ),
+        
+          ElevatedButton(
+            onPressed: () {
+              SocketClient.startGame();
+            }, 
+            child: const Text('START GAME (IF YOURE HOST)')
+          )
+        ],
       ),
     );
   }
