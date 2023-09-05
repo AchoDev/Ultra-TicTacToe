@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:ultra_tictactoe/SocketClient.dart';
-import 'GameScreen.dart';
+import '../GameScreen.dart';
 
 
 class Lobby extends StatefulWidget {
@@ -13,10 +13,10 @@ class Lobby extends StatefulWidget {
   final Function(int, int) changePage;
 
   @override
-  State<Lobby> createState() => _LobbyState();
+  State<Lobby> createState() => LobbyState();
 }
 
-class _LobbyState extends State<Lobby> {
+class LobbyState extends State<Lobby> {
 
   int playercount = 0;
 
@@ -28,6 +28,8 @@ class _LobbyState extends State<Lobby> {
   }
 
   void listenForServer() {
+
+    print('listening');
     listening = true;
     SocketClient.listenFor('hoststartgame', (p0) => Navigator.of(context).push(
       MaterialPageRoute(builder: (context) => const GameScreen())
@@ -45,8 +47,6 @@ class _LobbyState extends State<Lobby> {
 
   @override
   Widget build(BuildContext context) {
-
-    if(!listening) listenForServer();
 
     return SizedBox(
       width: MediaQuery.sizeOf(context).width,
@@ -66,7 +66,15 @@ class _LobbyState extends State<Lobby> {
               SocketClient.startGame();
             }, 
             child: const Text('START GAME (IF YOURE HOST)')
-          )
+          ),
+
+          ElevatedButton(
+            onPressed: () {
+              SocketClient.stopConnection();
+              widget.changePage(1, 2);
+            }, 
+            child: const Text('Leave lobby :(')
+          ),
         ],
       ),
     );

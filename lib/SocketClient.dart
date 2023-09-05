@@ -4,7 +4,6 @@ import 'dart:math';
 
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
 class SocketClient {
@@ -40,6 +39,7 @@ class SocketClient {
       return completer.future;
     } else {
       _socket!.disconnect();
+      _socket = null;
       return await connect(ip, callBack);
     }
   }
@@ -49,7 +49,10 @@ class SocketClient {
   }
 
   static void listenFor(String event, Function(dynamic) callback) {
-    if(_socket == null) return;
+    if(_socket == null) {
+      print('socket is null but still trying to listen to something!');
+      return;
+    }
 
     _socket!.on(event, ((data) {
       print('DATA: $data');
@@ -106,6 +109,7 @@ class SocketClient {
 
   static void stopConnection() {
     if(_nodeProcess != null) _nodeProcess!.kill();
-    if(_socket != null) _socket!.disconnect();
+    if(_socket != null) _socket!.dispose();
+    _socket = null;
   }
 }
