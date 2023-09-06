@@ -35,13 +35,8 @@ class LobbyState extends State<Lobby> {
       MaterialPageRoute(builder: (context) => const GameScreen())
     ));
 
-    SocketClient.listenFor('joinlobbyresponse', (p0) {
-      print(p0);
-      if(mounted) setState(() => playercount = (p0 - 1) as int);
-    });
-
-    SocketClient.listenFor('userjoinedlobby', (p1) {
-      if(mounted) setState(() => playercount++);
+    SocketClient.listenFor('userjoinedlobby', (information) {
+      if(mounted) setState(() => playercount = information['playercount']);
     });
   }
 
@@ -70,6 +65,7 @@ class LobbyState extends State<Lobby> {
 
           ElevatedButton(
             onPressed: () {
+              setState(() => playercount = 0);
               SocketClient.stopConnection();
               widget.changePage(1, 2);
             }, 

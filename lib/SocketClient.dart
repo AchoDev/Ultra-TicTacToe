@@ -5,30 +5,37 @@ import 'dart:math';
 import 'dart:io';
 
 import 'package:socket_io_client/socket_io_client.dart' as io;
+import 'Server.dart';
 
 class SocketClient {
   static io.Socket? _socket;
 
-  static Future<bool> connect(String ip, [Function? callBack]) async {
-
+  static Future<bool> connect(String ip, String username, [Function? callBack]) async {
+    print(_socket);
     if(_socket == null) {
-
-      final Completer<bool> completer = Completer<bool>();
+      
+      print(ip);
+      
+      Completer<bool> completer = Completer<bool>();
 
       _socket = io.io('http://$ip:8000', <String, dynamic>{
         'transports': ['websocket'],
       });
 
-      _socket!.onConnect((_) {
-        print('connected to server');
+      _socket!.on('connect', (_) {
+        _socket!.emit('playerInformation', username);
+        
+        completer.complete(true);
 
-        if(!completer.isCompleted) completer.complete(true);
+        completer = Completer<bool>();
       });
 
       _socket!.onConnectError((_) {
         print('connection error');
 
-        if(!completer.isCompleted) completer.complete(false);
+        completer.complete(false);
+
+        completer = Completer<bool>();
       });
 
 
@@ -38,9 +45,12 @@ class SocketClient {
 
       return completer.future;
     } else {
+
+      print('aaa');
+
       _socket!.disconnect();
       _socket = null;
-      return await connect(ip, callBack);
+      return await connect(ip, username, callBack);
     }
   }
 
@@ -69,35 +79,51 @@ class SocketClient {
 
   static Future<bool> hostLocalLobby(String username, Function(bool) callback) async {
 
-    _nodeProcess = await Process.start('node', ['server/server.js']);
-    final completer = Completer<bool>();
+    // _nodeProcess = await Process.start('node', ['server/server.js']);
 
-    _nodeProcess!.stdout.transform(utf8.decoder).listen((data) async {
-      // print('Node.js Server Output: $data');
+    // print('node process started!');
+
+
+
+    if (!await GameServer.startServer()) {
+    
+      print('no!!!!');
+      return false;
+    }
+
+    print('i am connected ,:)');
+
+    final bool isConnected = await connect('localhost', username);
+
+    callback(isConnected);
+
+    return isConnected;
+
+    // _nodeProcess!.stdout.transform(utf8.decoder).listen((data) async {
+    //   // print('Node.js Server Output: $data');
       
-      final bool isConnected = await connect('localhost');
+    //   final bool isConnected = await connect('localhost');
 
-      if(!isConnected) stopConnection();
-      callback(isConnected);
-      if(!completer.isCompleted) completer.complete(isConnected);
+    //   if(!isConnected) stopConnection();
+    //   callback(isConnected);
+    //   if(!completer.isCompleted) completer.complete(isConnected);
       
-    });
+    // });
 
-    _nodeProcess!.stderr.transform(utf8.decoder).listen((data) {
-      print('Node.js Server Error: $data');
-      if(!completer.isCompleted) {
-        completer.complete(false);
-        callback(false);
-      }
-    });
+    // _nodeProcess!.stderr.transform(utf8.decoder).listen((data) {
+    //   print('Node.js Server Error: $data');
+    //   if(!completer.isCompleted) {
+    //     completer.complete(false);
+    //     callback(false);
+    //   }
+    // });
 
-    return completer.future;
   }
 
   static Future<bool> joinLocalLobby(String username, String ip) async {
     late bool result;
     
-    if(_socket == null) result = await connect(ip);
+    if(_socket == null) result = await connect(ip, username);
 
     if(result) {
       _socket!.emit('joinlobby', {'data': username});
@@ -111,5 +137,9 @@ class SocketClient {
     if(_nodeProcess != null) _nodeProcess!.kill();
     if(_socket != null) _socket!.dispose();
     _socket = null;
+
+    GameServer.stopServer();
+
+    print('disconnect');
   }
 }
