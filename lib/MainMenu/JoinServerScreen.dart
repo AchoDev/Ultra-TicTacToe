@@ -35,6 +35,12 @@ class _JoinServerScreenState extends State<JoinServerScreen> {
     setState(() => errorText = '');
   }
 
+  int selectedPicture = 0;
+
+  void selectPicture(int id) {
+    setState(() => selectedPicture = id);
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -43,7 +49,7 @@ class _JoinServerScreenState extends State<JoinServerScreen> {
 
       child: FractionallySizedBox(
         widthFactor: 0.3,
-        heightFactor: 0.5,
+        heightFactor: 0.85,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -124,7 +130,27 @@ class _JoinServerScreenState extends State<JoinServerScreen> {
                 filled: true,
               ),
             ),
+
+            const Text(
+              'Choose Profile Picture'
+            ),
+
+            SizedBox(
+              width: 600,
+              height: 350,
+              child: SingleChildScrollView(
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  children: [
+                    for(int i = 0; i < 55; i++)
+                      _SelectablePicture(id: i + 1, isSelected: i + 1 == selectedPicture, selectPicture: selectPicture,)
+                  ],
+                ),
+              ),
+            ),
           
+            const SizedBox(height: 20,),
+
             JumpOnHover(
               child: SizedBox(
                 width: double.infinity,
@@ -142,7 +168,12 @@ class _JoinServerScreenState extends State<JoinServerScreen> {
                       return;
                     }
 
-                    SocketClient.joinLocalLobby(usernameController.text, ipController.text);
+                    if(selectedPicture == 0) {
+                      raiseError('Select a Picture');
+                      return;
+                    }
+
+                    SocketClient.joinLocalLobby(usernameController.text, selectedPicture, ipController.text,);
                     // Navigator.of(context).push(MaterialPageRoute(builder: (context) => Lobby()));
                   }, 
                   child: const Text('Join')
@@ -162,7 +193,12 @@ class _JoinServerScreenState extends State<JoinServerScreen> {
                       return;
                     }
 
-                    SocketClient.hostLocalLobby(usernameController.text, (isConnected) {
+                    if(selectedPicture == 0) {
+                      raiseError('Select a Picture');
+                      return;
+                    }
+
+                    SocketClient.hostLocalLobby(usernameController.text, selectedPicture, (isConnected) {
                       Navigator.of(context).pop();
 
                       if(isConnected) {
@@ -207,6 +243,43 @@ class _JoinServerScreenState extends State<JoinServerScreen> {
               ),
             )
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SelectablePicture extends StatelessWidget {
+  const _SelectablePicture({
+    super.key,
+    required this.id,
+    required this.isSelected,
+    required this.selectPicture,
+  });
+
+  final int id;
+  final bool isSelected;
+  final Function(int) selectPicture;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.all(3),
+      child: JumpOnHover(
+        scaleAmount: 1.4,
+        child: GestureDetector(
+          
+          onTap: () => selectPicture(id),
+          child: CircleAvatar(
+            radius: 68,
+            backgroundColor: isSelected ? Color.fromARGB(255, 85, 255, 43) : Colors.transparent,
+            child: Center(
+              child: CircleAvatar(
+                radius: 63,
+                foregroundImage: AssetImage('userpictures/$id.jpeg'),
+              ),
+            ),
+          ),
         ),
       ),
     );

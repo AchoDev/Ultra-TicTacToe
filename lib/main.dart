@@ -4,9 +4,6 @@
 
 import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter/gestures.dart';
-import 'package:ultra_tictactoe/GameScreen.dart';
-import 'package:ultra_tictactoe/SocketClient.dart';
 
 
 import 'package:google_fonts/google_fonts.dart';
@@ -110,7 +107,14 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
 
     _audioPlayer = AudioPlayer();
 
+    _audioPlayer.onPlayerComplete.listen(
+      (event) {
+        _audioPlayer.play(DeviceFileSource('audio/menumusic.mp3'));
+      }
+    );
+
     _audioPlayer.play(DeviceFileSource('audio/menumusic.mp3'));
+
   }
 
   @override
@@ -133,6 +137,13 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
 
   final GlobalObjectKey<LobbyState> lobbyKey = const GlobalObjectKey<LobbyState>('lobbykey');
 
+  bool backgroundVisible = true;
+
+  void turnBackgroundOff() {
+    print('background turned of');
+    setState(() => backgroundVisible = false);
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -152,32 +163,32 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
       body: Stack(
         children: [
 
-          AnimatedBuilder(
-
+          if(backgroundVisible) AnimatedBuilder(
+            
             animation: _backgroundController,
             builder: (context, child) {
-
+          
               if(_backgroundController.value > 0.9) {
                 WidgetsBinding.instance.addPostFrameCallback((timeStamp) => setState(() => iconOpc = 0));
               }
               else if(iconOpc != 1) {
                 WidgetsBinding.instance.addPostFrameCallback((timeStamp) => setState(() => iconOpc = 1));
               }
-
-              return Positioned(
+          
+              return !backgroundVisible ? SizedBox(width: MediaQuery.sizeOf(context).width,) : Positioned(
                 // duration: const Duration(seconds: 5),
-
+          
                 right: _backgroundTween.evaluate(animation),
                 top: _backgroundTween.evaluate(animation),
-
+          
                 // right: 1000,
                 // top: 1000,
                 
                 height: backgroundTileSize * 20,
                 width: backgroundTileSize * 20,
-
+          
                 child: GridView.count(
-
+          
                   physics: const NeverScrollableScrollPhysics(),
                   
                   crossAxisCount: 20,
@@ -190,7 +201,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                           height: 1,
                 
                           color: (i % 2 == 0 && j % 2 != 0) || (i % 2 != 0 && j % 2 == 0)? Colors.red[400] : Colors.blue[400],
-
+          
                           child: AnimatedOpacity(
                             curve: Curves.easeOut,
                             duration: const Duration(milliseconds: 200),
@@ -227,6 +238,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                     MainScreen(
                       changePage: changePage,
                       audioPlayer: _audioPlayer,
+                      turnBackgroundOff: turnBackgroundOff,
                     ),
                       
                     SettingsScreen(
@@ -306,11 +318,14 @@ class MainScreen extends StatefulWidget {
   const MainScreen({
     super.key,
     required this.changePage,
-    required this.audioPlayer
+    required this.audioPlayer,
+    required this.turnBackgroundOff,
   });
   
   final Function(int, int) changePage;
   final AudioPlayer audioPlayer;
+
+  final VoidCallback turnBackgroundOff;
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -369,6 +384,10 @@ class _MainScreenState extends State<MainScreen> {
               ElevatedButton(
                 onPressed: () => widget.audioPlayer.stop(), 
                 child: const Text('stop music')
+              ),
+              ElevatedButton(
+                onPressed: () => widget.turnBackgroundOff(), 
+                child: const Text('turn background off')
               ),
             ],
           ),
