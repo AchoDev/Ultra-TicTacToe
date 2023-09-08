@@ -259,6 +259,10 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                     PlayScreen(
                       changePage: changePage,
                     ),
+
+                    SingleplayerScreen(
+                      changePage: changePage
+                    ),
                   ]
                 ),
 
