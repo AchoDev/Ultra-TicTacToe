@@ -74,7 +74,17 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
 
     _audioPlayer = AudioPlayer();
 
+<<<<<<< Updated upstream
     _audioPlayer.play(DeviceFileSource('audio/menumusic.mp3'));
+=======
+    _audioPlayer.onPlayerComplete.listen(
+      (event) {
+        _audioPlayer.play(DeviceFileSource('assets/audio/menumusic.mp3'));
+      }
+    );
+
+    _audioPlayer.play(DeviceFileSource('assets/audio/menumusic.mp3'));
+>>>>>>> Stashed changes
 
     
   }
@@ -208,19 +218,55 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                   changePage: changePage,
                 ),
 
+<<<<<<< Updated upstream
                 JoinServerScreen(
                   changePage: changePage
                 ),
+=======
+
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SetupScreen(
+                      changePage: changePage,
+                      yPosition: 2,
+                    ),
+                    JoinServerScreen(
+                      changePage: changePage,
+                      lobbyKey: lobbyKey,
+                    ),
+
+                    BlankPage(),
+
+                  ],
+                ),
+
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SetupScreen(
+                      changePage: changePage,
+                      yPosition: 3,
+                    ),
+                    Lobby(
+                      key: lobbyKey,
+                      changePage: changePage,
+                    ),
+                    BlankPage(),
+                  ],
+                ),
+
+>>>>>>> Stashed changes
               ],
             ),
           ),
-        
         ],
       ),
     );
   }
 }
 
+<<<<<<< Updated upstream
 class PlayScreen extends StatelessWidget {
   const PlayScreen({
     super.key,
@@ -252,6 +298,15 @@ class PlayScreen extends StatelessWidget {
             )
           ),
 
+=======
+class BlankPage extends StatelessWidget {
+  @override
+  Widget build(context) => SizedBox(
+    height: MediaQuery.sizeOf(context).height,
+    width: MediaQuery.sizeOf(context).width,
+  );
+}
+>>>>>>> Stashed changes
 
           FilledButton(
             onPressed: () => changePage(1, 2),
@@ -314,20 +369,20 @@ class _MainScreenState extends State<MainScreen> {
                     changePage: widget.changePage, 
                     pageX: 1,
                     pageY: 1,
-                    image: const AssetImage('images/playbutton.png'),
+                    image: const AssetImage('assets/images/playbutton.png'),
                   ),
                   _MenuButton(
                     changePage: widget.changePage, 
                     pageX: 2,
                     pageY: 0, 
-                    image: const AssetImage('images/settingsbutton.png')
+                    image: const AssetImage('assets/images/settingsbutton.png')
                   ),
             
                   _MenuButton(
                     changePage: widget.changePage, 
                     pageX: 0,
                     pageY: 0,
-                    image: const AssetImage('images/creditsbutton.png')
+                    image: const AssetImage('assets/images/creditsbutton.png')
                   ),
                 ],
               ),
@@ -570,7 +625,7 @@ class _LogoState extends State<Logo> with SingleTickerProviderStateMixin{
           scale: _scaleAnimation.value,
           child: SizedBox(
             width: 500,
-            child: Image(image: AssetImage('images/logo.png'))
+            child: Image(image: AssetImage('assets/images/logo.png'))
           ),
         );
       }
