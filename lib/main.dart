@@ -5,7 +5,6 @@
 import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
 
-
 import 'package:google_fonts/google_fonts.dart';
 
 import 'MainMenu/Lobby.dart';
@@ -107,17 +106,13 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
 
     _audioPlayer = AudioPlayer();
 
-<<<<<<< HEAD
-=======
+    _audioPlayer.play(DeviceFileSource('assets/audio/menumusic.mp3'));
+
     _audioPlayer.onPlayerComplete.listen(
       (event) {
-        _audioPlayer.play(DeviceFileSource('audio/menumusic.mp3'));
+        _audioPlayer.play(DeviceFileSource('assets/audio/menumusic.mp3'));
       }
     );
-
->>>>>>> parent of f024b91 (Merge branch 'fixing' into easy-multiplayer)
-    _audioPlayer.play(DeviceFileSource('audio/menumusic.mp3'));
-
   }
 
   @override
@@ -267,82 +262,24 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
 
                     SingleplayerScreen(
                       changePage: changePage
-                    )
-
-                  ],
+                    ),
+                  ]
                 ),
 
-<<<<<<< HEAD
-                JoinServerScreen(
-                  changePage: changePage
-                ),
-              ],
-            ),
-          ),
-        
-        ],
-      ),
-    );
-  }
-}
-
-class PlayScreen extends StatelessWidget {
-  const PlayScreen({
-    super.key,
-    required this.changePage,
-  });
-
-  final Function(int, int) changePage;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.sizeOf(context).height,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        
-        children: [
-          ElevatedButton(
-            onPressed: () => changePage(1, 0),
-            child: Text('back')
-          ),
-
-          FilledButton(
-            onPressed: () => print('fjdksafjk'),
-            child: Text(
-              'Singleplayer',
-              style: GoogleFonts.pressStart2p(
-                fontSize: 10
-              ),
-            )
-          ),
-
-
-          FilledButton(
-            onPressed: () => changePage(1, 2),
-            child: Text(
-              'Multiplayer',
-              style: GoogleFonts.pressStart2p(
-                fontSize: 10
-              ),
-            )
-          ),
-=======
 
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     SetupScreen(
                       changePage: changePage,
+                      yPosition: 2,
                     ),
                     JoinServerScreen(
                       changePage: changePage,
                       lobbyKey: lobbyKey,
                     ),
 
-                    SetupScreen(
-                      changePage: changePage,
-                    ),
+                    BlankPage(),
 
                   ],
                 ),
@@ -350,10 +287,15 @@ class PlayScreen extends StatelessWidget {
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    SetupScreen(
+                      changePage: changePage,
+                      yPosition: 3,
+                    ),
                     Lobby(
                       key: lobbyKey,
                       changePage: changePage,
                     ),
+                    BlankPage(),
                   ],
                 ),
 
@@ -361,14 +303,19 @@ class PlayScreen extends StatelessWidget {
             ),
           ),
         
->>>>>>> parent of f024b91 (Merge branch 'fixing' into easy-multiplayer)
         ],
       ),
     );
   }
 }
 
-
+class BlankPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    width: MediaQuery.sizeOf(context).width,
+    height: MediaQuery.sizeOf(context).height,
+  );
+}
 
 
 

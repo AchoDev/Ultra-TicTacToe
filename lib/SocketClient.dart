@@ -69,8 +69,8 @@ class SocketClient {
     }));
   }
 
-  static void startGame() {
-    _socket!.emit('startgame');
+  static void startGame(String map) {
+    _socket!.emit('startgame', map);
   }
 
   static Process? _nodeProcess;

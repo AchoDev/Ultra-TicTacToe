@@ -43,7 +43,7 @@ dependencies:
   socket_io_client: 1.0.2
   socket_io_common: ^1.0.0-nullsafety.1
   socket_io: ^1.0.1
->>>>>>> parent of f024b91 (Merge branch 'fixing' into easy-multiplayer)
+  flutter_gif: ^0.0.4
 
 dev_dependencies:
   flutter_test:
@@ -69,12 +69,11 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - images/
-    - audio/
-<<<<<<< HEAD
-=======
-    - userpictures/
->>>>>>> parent of f024b91 (Merge branch 'fixing' into easy-multiplayer)
+    - assets/images/
+    - assets/audio/
+    - assets/userpictures/
+    - assets/maps/
+    - assets/animations/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

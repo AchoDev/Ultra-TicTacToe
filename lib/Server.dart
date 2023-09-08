@@ -29,6 +29,10 @@ class GameServer {
       io.on('connection', (socket) {
         print('player connected');
 
+        socket.on('startgame', (data) {
+          if(socket == _players[0].socket) {io.emit('hoststartgame', data);}
+        });
+
         socket.on('playerInformation', (data) {
 
           bool isHost = _players.isEmpty;
