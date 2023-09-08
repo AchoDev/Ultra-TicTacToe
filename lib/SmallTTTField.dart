@@ -14,11 +14,7 @@ class SmallTTTField extends StatefulWidget {
     required this.enemyCheckedWidget,
 
     required this.winningMoves,
-  
-    required this.map,
   });
-
-  final String map;
 
   final int localPosition;
   final Function checkField;
@@ -90,11 +86,8 @@ class SmallTTTFieldState extends State<SmallTTTField> {
       for(int i = 0; i < 9; i++)
         SmallTTTFieldButton(
           key: buttonKeys[i],
-          // selectedChild: const Icon(Icons.close_rounded, size: 50,),
-          // enemySelectedChild: const Icon(Icons.circle_outlined, size: 50,),
-
-          selectedChild: Image(image: AssetImage('assets/animations/${widget.map}X.gif'),),
-          enemySelectedChild: Image(image: AssetImage('assets/animations/${widget.map}O.gif'),),
+          selectedChild: const Icon(Icons.close_rounded, size: 50,),
+          enemySelectedChild: const Icon(Icons.circle_outlined, size: 50,),
 
           localPosition: i,
           checkPosition: (pos) {

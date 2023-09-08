@@ -10,10 +10,8 @@ import 'SocketClient.dart' as client;
 class GameScreen extends StatefulWidget {
   const GameScreen({
     super.key,
-    required this.map,
   });
 
-  final String map;
 
   @override
   State<GameScreen> createState() => _GameScreenState();
@@ -157,78 +155,66 @@ class _GameScreenState extends State<GameScreen> {
         child: Stack(
           children: [
 
-            SizedBox(
-              width: MediaQuery.sizeOf(context).width,
-              child: Image(image: AssetImage('assets/maps/${widget.map}.png'), fit: BoxFit.cover,)
-            ),
-        
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-        
-                // Row(
-                //   mainAxisAlignment: MainAxisAlignment.center,
-                //   children: [
-                //     ElevatedButton(
-                //       onPressed: () => enemyCheckField(currentField != 9 ? currentField : Random().nextInt(8), Random().nextInt(8)),
-                //       child: Text('enemy checks random')
-                //     ),
-                //     ElevatedButton(
-                //       onPressed: () => enemyCheckField(1, 6),
-                //       child: Text('enemy checks 1, 6')
-                //     ),
-                //     ElevatedButton(
-                //       onPressed: () => enemyCheckField(1, 4),
-                //       child: Text('enemy checks 1, 4')
-                //     ),
-                //     ElevatedButton(
-                //       onPressed: () => enemyCheckField(1, 2),
-                //       child: Text('enemy checks 1, 2')
-                //     ),
-                //   ],
-                // ),
-        
-                // Text('ULTRA TIC TAC TOE'),
-                // Text('[[penis]] vs [[ENEMY USERNAME]]'),
 
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () => enemyCheckField(currentField != 9 ? currentField : Random().nextInt(8), Random().nextInt(8)),
+                      child: Text('enemy checks random')
+                    ),
+                    ElevatedButton(
+                      onPressed: () => enemyCheckField(1, 6),
+                      child: Text('enemy checks 1, 6')
+                    ),
+                    ElevatedButton(
+                      onPressed: () => enemyCheckField(1, 4),
+                      child: Text('enemy checks 1, 4')
+                    ),
+                    ElevatedButton(
+                      onPressed: () => enemyCheckField(1, 2),
+                      child: Text('enemy checks 1, 2')
+                    ),
+                  ],
+                ),
 
-                Opacity(
-                  opacity: 1,
-                  child: Center(
-                    child: IgnorePointer(
-                      // ignoring: !yourTurn,
-                      ignoring: false,
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints.tight(const Size(780, 780)),
-                        child: GridView.count(
-                          crossAxisCount: 3,
-                          children: [
-                            for(int i = 0; i < 9; i++)
-                              Container(
-                                margin: const EdgeInsets.all(2),
-                                decoration: BoxDecoration(
-                                  color: currentField == 9 || currentField == i ? Color.fromARGB(129, 244, 67, 54) : Colors.transparent,
-                                ),
-                                child: SmallTTTField(
-                                  key: fieldKeys[i],
-                                  checkField: checkField,
-                                  checkGlobalWinner: checkWinner,
-                          
-                                  localPosition: i,
-                                  currentlySelected: currentField == 9 || currentField == i,
-                          
-                                  checkedWidget: const Icon(Icons.close_rounded, size: 200,),
-                                  enemyCheckedWidget: const Icon(Icons.circle_outlined, size: 200,),
-                          
-                                  winningMoves: winningMoves,
-
-                                  map: widget.map,
-                                )
+                Text('ULTRA TIC TAC TOE'),
+                Text('[[penis]] vs [[ENEMY USERNAME]]'),
+                IgnorePointer(
+                  ignoring: !yourTurn,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints.tight(const Size(700, 700)),
+                    child: GridView.count(
+                      crossAxisCount: 3,
+                      children: [
+                        for(int i = 0; i < 9; i++)
+                          Container(
+                            decoration: BoxDecoration(
+                              color: currentField == 9 || currentField == i ? Colors.red : Colors.grey,
+                              border: Border(
+                                right: i == 2 || i == 5 || i == 8 ? BorderSide.none : BorderSide(width: 10, color: borderColor),
+                                top: i == 0 || i == 1 || i == 2 ? BorderSide.none : BorderSide(width: 10, color: borderColor)
                               )
-                          ]
-                        ),
-                      ),
+                            ),
+                            child: SmallTTTField(
+                              key: fieldKeys[i],
+                              checkField: checkField,
+                              checkGlobalWinner: checkWinner,
+
+                              localPosition: i,
+                              currentlySelected: currentField == 9 || currentField == i,
+
+                              checkedWidget: const Icon(Icons.close_rounded, size: 200,),
+                              enemyCheckedWidget: const Icon(Icons.circle_outlined, size: 200,),
+
+                              winningMoves: winningMoves,
+                            )
+                          )
+                      ]
                     ),
                   ),
                 ),
@@ -251,6 +237,7 @@ class _GameScreenState extends State<GameScreen> {
                 ),
               ),
             )
+
           ],
         ),
       ),

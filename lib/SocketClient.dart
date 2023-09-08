@@ -35,14 +35,9 @@ class SocketClient {
     }));
   }
 
-<<<<<<< Updated upstream
   static void startGame() {
     print('a');
     _socket!.emit('startgame');
-=======
-  static void startGame(String map) {
-    _socket!.emit('startgame', map);
->>>>>>> Stashed changes
   }
 
   static void joinLocalLobby(String username, String ip) {

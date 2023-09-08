@@ -40,6 +40,7 @@ class SmallTTTFieldButtonState extends State<SmallTTTFieldButton> {
   void checkMark() {
     if(selected) return;
 
+
     setState(() {
       widget.checkPosition(widget.localPosition);
       selected = true;
@@ -49,41 +50,33 @@ class SmallTTTFieldButtonState extends State<SmallTTTFieldButton> {
     widget.checkWinner();
   }
 
-  bool hovered = false;
-
   @override
   Widget build(BuildContext context) {
 
-    return MouseRegion(
-      onEnter: (e) {
-        setState(() => hovered = true);
-      },
-      onExit: (e) => setState(() => hovered = false),
-      child: Container(
-        margin: EdgeInsets.all(0),
-        width: 10,
-        height: 10,
-        decoration: BoxDecoration(
-          color: hovered ? Colors.amber : Colors.transparent,
-          borderRadius: BorderRadius.circular(15),
-          // border: Border(
-          //   right: i == 2 || i == 5 || i == 8 ? BorderSide.none : BorderSide(width: borderWidth),
-          //   top: i == 0 || i == 1 || i == 2 ? BorderSide.none : BorderSide(width: borderWidth)
-          // )
-        ),
-        child: GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () => checkMark(),
-        
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Visibility(
-                visible: selected,
-                child: selectedBy == 1 ? widget.selectedChild : widget.enemySelectedChild
-              ),
-            ],
-          ),
+    return Container(
+      margin: EdgeInsets.all(1),
+      width: 5,
+      height: 5,
+      decoration: BoxDecoration(
+        color: Colors.amber,
+        borderRadius: BorderRadius.circular(15),
+        // border: Border(
+        //   right: i == 2 || i == 5 || i == 8 ? BorderSide.none : BorderSide(width: borderWidth),
+        //   top: i == 0 || i == 1 || i == 2 ? BorderSide.none : BorderSide(width: borderWidth)
+        // )
+      ),
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () => checkMark(),
+
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Visibility(
+              visible: selected,
+              child: selectedBy == 1 ? widget.selectedChild : widget.enemySelectedChild
+            ),
+          ],
         ),
       ),
     );
