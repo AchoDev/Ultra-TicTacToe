@@ -260,12 +260,9 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                     PlayScreen(
                       changePage: changePage,
                     ),
-
-<<<<<<< Updated upstream
-                JoinServerScreen(
-                  changePage: changePage
+                  ]
                 ),
-=======
+
 
                 Row(
                   mainAxisSize: MainAxisSize.min,
@@ -299,7 +296,6 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                   ],
                 ),
 
->>>>>>> Stashed changes
               ],
             ),
           ),
@@ -309,7 +305,13 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
   }
 }
 
-
+class BlankPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    width: MediaQuery.sizeOf(context).width,
+    height: MediaQuery.sizeOf(context).height,
+  );
+}
 
 
 
