@@ -35,9 +35,15 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
-  socket_io_client: ^2.0.3+1
   google_fonts: ^5.1.0
   audioplayers: ^5.1.0
+<<<<<<< HEAD
+=======
+  
+  socket_io_client: 1.0.2
+  socket_io_common: ^1.0.0-nullsafety.1
+  socket_io: ^1.0.1
+>>>>>>> parent of f024b91 (Merge branch 'fixing' into easy-multiplayer)
 
 dev_dependencies:
   flutter_test:
@@ -65,6 +71,10 @@ flutter:
   assets:
     - images/
     - audio/
+<<<<<<< HEAD
+=======
+    - userpictures/
+>>>>>>> parent of f024b91 (Merge branch 'fixing' into easy-multiplayer)
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

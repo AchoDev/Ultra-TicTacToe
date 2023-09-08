@@ -4,14 +4,23 @@
 
 import 'dart:math';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter/gestures.dart';
-import 'package:ultra_tictactoe/GameScreen.dart';
-import 'package:ultra_tictactoe/SocketClient.dart';
 
 
 import 'package:google_fonts/google_fonts.dart';
 
-import 'Lobby.dart';
+import 'MainMenu/Lobby.dart';
+import 'shared/MapAlike.dart';
+
+import 'MainMenu/CreditsScreen.dart';
+import 'MainMenu/SettingsScreen.dart';
+
+import 'MainMenu/LocalMultiplayerScreen.dart';
+import 'MainMenu/PlayScreen.dart';
+import 'MainMenu/SingleplayerScreen.dart';
+
+import 'MainMenu/SetupScreen.dart';
+import 'MainMenu/JoinServerScreen.dart';
+
 
 import 'package:vector_math/vector_math_64.dart' as vm;
 
@@ -21,8 +30,31 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print(state);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+  }
 
   // This widget is the root of your application.
   @override
@@ -32,6 +64,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
         useMaterial3: true,
+        textTheme: GoogleFonts.pressStart2pTextTheme(),
       ),
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
@@ -74,9 +107,17 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
 
     _audioPlayer = AudioPlayer();
 
+<<<<<<< HEAD
+=======
+    _audioPlayer.onPlayerComplete.listen(
+      (event) {
+        _audioPlayer.play(DeviceFileSource('audio/menumusic.mp3'));
+      }
+    );
+
+>>>>>>> parent of f024b91 (Merge branch 'fixing' into easy-multiplayer)
     _audioPlayer.play(DeviceFileSource('audio/menumusic.mp3'));
 
-    
   }
 
   @override
@@ -89,7 +130,6 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
   late AnimationController _backgroundController;
   late Tween<double> _backgroundTween;
 
-
   late Animation<double> animation;
 
   late AudioPlayer _audioPlayer;
@@ -97,6 +137,15 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
   List<IconData> icons = List.generate(500, (index) => IconData(int.parse('0xe${Random().nextInt(9)}b${Random().nextInt(9)}'), fontFamily: 'MaterialIcons'));
 
   double iconOpc = 1;
+
+  final GlobalObjectKey<LobbyState> lobbyKey = const GlobalObjectKey<LobbyState>('lobbykey');
+
+  bool backgroundVisible = true;
+
+  void turnBackgroundOff() {
+    print('background turned of');
+    setState(() => backgroundVisible = false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -117,32 +166,32 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
       body: Stack(
         children: [
 
-          AnimatedBuilder(
-
+          if(backgroundVisible) AnimatedBuilder(
+            
             animation: _backgroundController,
             builder: (context, child) {
-
+          
               if(_backgroundController.value > 0.9) {
                 WidgetsBinding.instance.addPostFrameCallback((timeStamp) => setState(() => iconOpc = 0));
               }
               else if(iconOpc != 1) {
                 WidgetsBinding.instance.addPostFrameCallback((timeStamp) => setState(() => iconOpc = 1));
               }
-
-              return Positioned(
+          
+              return !backgroundVisible ? SizedBox(width: MediaQuery.sizeOf(context).width,) : Positioned(
                 // duration: const Duration(seconds: 5),
-
+          
                 right: _backgroundTween.evaluate(animation),
                 top: _backgroundTween.evaluate(animation),
-
+          
                 // right: 1000,
                 // top: 1000,
                 
                 height: backgroundTileSize * 20,
                 width: backgroundTileSize * 20,
-
+          
                 child: GridView.count(
-
+          
                   physics: const NeverScrollableScrollPhysics(),
                   
                   crossAxisCount: 20,
@@ -155,7 +204,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                           height: 1,
                 
                           color: (i % 2 == 0 && j % 2 != 0) || (i % 2 != 0 && j % 2 == 0)? Colors.red[400] : Colors.blue[400],
-
+          
                           child: AnimatedOpacity(
                             curve: Curves.easeOut,
                             duration: const Duration(milliseconds: 200),
@@ -175,7 +224,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
             curve: Curves.elasticOut,
 
             width: MediaQuery.of(context).size.width * 3,
-            height: MediaQuery.of(context).size.height * 3,
+            height: MediaQuery.of(context).size.height * 4,
             left: currentPageX * -MediaQuery.of(context).size.width,
             top: currentPageY * -MediaQuery.of(context).size.height,
 
@@ -192,6 +241,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                     MainScreen(
                       changePage: changePage,
                       audioPlayer: _audioPlayer,
+                      turnBackgroundOff: turnBackgroundOff,
                     ),
                       
                     SettingsScreen(
@@ -204,10 +254,25 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
 
                 // JoinServerScreen(changePage: changePage),
 
-                PlayScreen(
-                  changePage: changePage,
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    LocalMultiplayerScreen(
+                      changePage: changePage,
+                    ),
+
+                    PlayScreen(
+                      changePage: changePage,
+                    ),
+
+                    SingleplayerScreen(
+                      changePage: changePage
+                    )
+
+                  ],
                 ),
 
+<<<<<<< HEAD
                 JoinServerScreen(
                   changePage: changePage
                 ),
@@ -262,21 +327,65 @@ class PlayScreen extends StatelessWidget {
               ),
             )
           ),
+=======
+
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SetupScreen(
+                      changePage: changePage,
+                    ),
+                    JoinServerScreen(
+                      changePage: changePage,
+                      lobbyKey: lobbyKey,
+                    ),
+
+                    SetupScreen(
+                      changePage: changePage,
+                    ),
+
+                  ],
+                ),
+
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Lobby(
+                      key: lobbyKey,
+                      changePage: changePage,
+                    ),
+                  ],
+                ),
+
+              ],
+            ),
+          ),
+        
+>>>>>>> parent of f024b91 (Merge branch 'fixing' into easy-multiplayer)
         ],
       ),
     );
   }
 }
 
+
+
+
+
+
+
 class MainScreen extends StatefulWidget {
   const MainScreen({
     super.key,
     required this.changePage,
-    required this.audioPlayer
+    required this.audioPlayer,
+    required this.turnBackgroundOff,
   });
   
   final Function(int, int) changePage;
   final AudioPlayer audioPlayer;
+
+  final VoidCallback turnBackgroundOff;
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -305,7 +414,7 @@ class _MainScreenState extends State<MainScreen> {
             
             
             children: [
-              Logo(),
+              const Logo(),
           
               Wrap(
                 direction: Axis.vertical,
@@ -334,143 +443,14 @@ class _MainScreenState extends State<MainScreen> {
           
               ElevatedButton(
                 onPressed: () => widget.audioPlayer.stop(), 
-                child: Text('stop music')
+                child: const Text('stop music')
+              ),
+              ElevatedButton(
+                onPressed: () => widget.turnBackgroundOff(), 
+                child: const Text('turn background off')
               ),
             ],
           ),
-      ),
-    );
-  }
-}
-
-class MapAlike extends StatefulWidget {
-  const MapAlike({
-    super.key,
-    required this.factor,
-    required this.child
-  });
-
-  final double factor;
-  final Widget child;
-
-  @override
-  State<MapAlike> createState() => _MapAlikeState();
-}
-
-class _MapAlikeState extends State<MapAlike> {
-  
-  Offset mousePosition = const Offset(1000, 500);
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onHover: (event) => {
-        setState(() => mousePosition = event.position)
-      },
-      child: Transform.translate(
-        offset: (mousePosition - Offset(MediaQuery.sizeOf(context).width / 2, MediaQuery.sizeOf(context).height / 2)) * -widget.factor,
-
-        child: widget.child,
-      )
-    );
-  }
-}
-
-class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({
-    super.key,
-    required this.changePage
-  });
-
-  final Function(int, int) changePage;
-
-  @override
-  State<SettingsScreen> createState() => _SettingsScreenState();
-}
-
-class _SettingsScreenState extends State<SettingsScreen> {
-
-  double musicVolume = 0.2;
-  double soundVolume = 0.5;
-
-  @override
-  Widget build(BuildContext context) {
-    return MapAlike(
-      factor: 0.2,
-      child: SizedBox(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-    
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Text(
-              'Settings',
-              style: GoogleFonts.pressStart2p(
-                fontSize: 30
-              ),
-            ),
-    
-            Text(
-              'Music Volume',
-              style: GoogleFonts.pressStart2p(
-    
-              ),
-            ),
-    
-            Slider(
-              value: musicVolume, 
-              onChanged: (value) => setState(() => musicVolume = value)
-            ),
-    
-            Text(
-              'Sound Volume',
-              style: GoogleFonts.pressStart2p(
-    
-              ),
-            ),
-    
-            Slider(
-              value: soundVolume, 
-              onChanged: (value) => setState(() => soundVolume = value)
-            ),
-    
-            ElevatedButton(
-              onPressed: () => widget.changePage(1, 0), 
-              child: Text('back')
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class CreditsScreen extends StatelessWidget {
-  const CreditsScreen({
-    super.key,
-    required this.changePage,
-  });
-
-  final Function(int, int) changePage;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: MediaQuery.of(context).size.width,
-
-      child: Column(
-        children: [
-
-          ElevatedButton(
-            onPressed: () => changePage(1, 0), 
-            child: Text('back')
-          ),
-
-          Text('CREDITS'),
-          Text('Game made by AchoDev')
-        ],
       ),
     );
   }
@@ -568,7 +548,7 @@ class _LogoState extends State<Logo> with SingleTickerProviderStateMixin{
       builder: (context, child) {
         return Transform.scale(
           scale: _scaleAnimation.value,
-          child: SizedBox(
+          child: const SizedBox(
             width: 500,
             child: Image(image: AssetImage('images/logo.png'))
           ),
@@ -577,76 +557,3 @@ class _LogoState extends State<Logo> with SingleTickerProviderStateMixin{
     );
   }
 }
-
-class SetupScreen extends StatelessWidget {
-  const SetupScreen({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      body: Column(
-        children: const [
-          Text('How do you set up a Server?'),
-          Text("I don't know ")
-        ],
-      ),
-    );
-  }
-}
-
-
-class JoinServerScreen extends StatelessWidget {
-  JoinServerScreen({
-    super.key,
-    required this.changePage
-  });
-
-  final Function changePage;
-
-  final usernameController = TextEditingController();
-  final ipController = TextEditingController();
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: MediaQuery.of(context).size.width,
-      child: Column(
-        children: [
-          ElevatedButton(
-            onPressed: () => changePage(1, 0), 
-            child: Text('back')
-          ),
-
-          Text('Join Server'),
-        
-           TextField(
-            controller: usernameController,
-            decoration: InputDecoration(
-              hintText: 'Enter Username',
-            ),
-          ),
-           TextField(
-            controller: ipController,
-            decoration: InputDecoration(
-              hintText: 'IP'
-            ),
-          ),
-    
-          ElevatedButton(
-            onPressed: () {
-              
-              SocketClient.joinLocalLobby(usernameController.text, ipController.text);
-    
-              Navigator.of(context).push(MaterialPageRoute(builder: (context) => Lobby()));
-            }, 
-            child: Text('Join')
-          )
-        ],
-      ),
-    );
-  }
-}
-
