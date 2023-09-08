@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
 import 'dart:io';
@@ -9,22 +10,20 @@ import 'Server.dart';
 class SocketClient {
   static io.Socket? _socket;
 
-  static Future<bool> connect(String ip, String username, int picture, [Function? callBack]) async {
-
+  static Future<bool> connect(String ip, String username, [Function? callBack]) async {
+    print(_socket);
     if(_socket == null) {
-            
+      
+      print(ip);
+      
       Completer<bool> completer = Completer<bool>();
 
       _socket = io.io('http://$ip:8000', <String, dynamic>{
         'transports': ['websocket'],
-        'force new connection': true,
       });
 
       _socket!.on('connect', (_) {
-        _socket!.emit('playerInformation', {
-          'username': username,
-          'picture': picture,
-        });
+        _socket!.emit('playerInformation', username);
         
         completer.complete(true);
 
@@ -47,9 +46,11 @@ class SocketClient {
       return completer.future;
     } else {
 
+      print('aaa');
+
       _socket!.disconnect();
       _socket = null;
-      return await connect(ip, username, picture, callBack);
+      return await connect(ip, username, callBack);
     }
   }
 
@@ -71,6 +72,7 @@ class SocketClient {
 
 <<<<<<< Updated upstream
   static void startGame() {
+    print('a');
     _socket!.emit('startgame');
 =======
   static void startGame(String map) {
@@ -80,7 +82,7 @@ class SocketClient {
 
   static Process? _nodeProcess;
 
-  static Future<bool> hostLocalLobby(String username, int picture, Function(bool) callback) async {
+  static Future<bool> hostLocalLobby(String username, Function(bool) callback) async {
 
     // _nodeProcess = await Process.start('node', ['server/server.js']);
 
@@ -89,12 +91,14 @@ class SocketClient {
 
 
     if (!await GameServer.startServer()) {
+    
+      print('no!!!!');
       return false;
     }
 
-    await Future.delayed(const Duration(milliseconds: 500));
+    print('i am connected ,:)');
 
-    final bool isConnected = await connect('localhost', username, picture);
+    final bool isConnected = await connect('localhost', username);
 
     callback(isConnected);
 
@@ -121,10 +125,10 @@ class SocketClient {
 
   }
 
-  static Future<bool> joinLocalLobby(String username, int picture, String ip) async {
+  static Future<bool> joinLocalLobby(String username, String ip) async {
     late bool result;
     
-    if(_socket == null) result = await connect(ip, username, picture);
+    if(_socket == null) result = await connect(ip, username);
 
     if(result) {
       _socket!.emit('joinlobby', {'data': username});
@@ -135,10 +139,8 @@ class SocketClient {
   }
 
   static void stopConnection() {
-    if(_socket != null) {
-      _socket!.close();
-      _socket!.dispose();
-    }
+    if(_nodeProcess != null) _nodeProcess!.kill();
+    if(_socket != null) _socket!.dispose();
     _socket = null;
 
     GameServer.stopServer();

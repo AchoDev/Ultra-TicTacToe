@@ -74,6 +74,7 @@ flutter:
 <<<<<<< Updated upstream
     - images/
     - audio/
+<<<<<<< HEAD
 =======
     - assets/images/
     - assets/audio/
@@ -81,6 +82,8 @@ flutter:
     - assets/maps/
     - assets/animations/
 >>>>>>> Stashed changes
+=======
+>>>>>>> parent of c62bfa5 (hosting FINALLY WORKS and pictures)
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

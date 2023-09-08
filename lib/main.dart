@@ -74,6 +74,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
 
     _audioPlayer = AudioPlayer();
 
+<<<<<<< HEAD
 <<<<<<< Updated upstream
     _audioPlayer.play(DeviceFileSource('audio/menumusic.mp3'));
 =======
@@ -87,6 +88,9 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
 >>>>>>> Stashed changes
 
     
+=======
+    _audioPlayer.play(DeviceFileSource('audio/menumusic.mp3'));
+>>>>>>> parent of c62bfa5 (hosting FINALLY WORKS and pictures)
   }
 
   @override
@@ -108,6 +112,11 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
 
   double iconOpc = 1;
 
+<<<<<<< HEAD
+=======
+  final GlobalObjectKey<LobbyState> lobbyKey = const GlobalObjectKey<LobbyState>('lobbykey');
+
+>>>>>>> parent of c62bfa5 (hosting FINALLY WORKS and pictures)
   @override
   Widget build(BuildContext context) {
 
@@ -389,7 +398,11 @@ class _MainScreenState extends State<MainScreen> {
           
               ElevatedButton(
                 onPressed: () => widget.audioPlayer.stop(), 
+<<<<<<< HEAD
                 child: Text('stop music')
+=======
+                child: const Text('stop music')
+>>>>>>> parent of c62bfa5 (hosting FINALLY WORKS and pictures)
               ),
             ],
           ),

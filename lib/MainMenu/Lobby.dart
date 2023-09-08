@@ -1,4 +1,5 @@
 
+<<<<<<< HEAD
 
 import 'dart:math';
 import 'dart:ui';
@@ -8,20 +9,17 @@ import 'package:ultra_tictactoe/SocketClient.dart';
 import 'package:ultra_tictactoe/shared/JumpOnHover.dart';
 import 'package:ultra_tictactoe/shared/MapAlike.dart';
 import 'package:ultra_tictactoe/shared/PagejumpButton.dart';
+=======
+import 'package:flutter/material.dart';
+import 'package:ultra_tictactoe/SocketClient.dart';
+>>>>>>> parent of c62bfa5 (hosting FINALLY WORKS and pictures)
 import '../GameScreen.dart';
 
-class _Player {
-  final String username;
-  final int picture;
-  final bool isHost;
-
-  const _Player({required this.username, required this.picture,required this.isHost});
-}
 
 class Lobby extends StatefulWidget {
   const Lobby({
     super.key,
-    required this.changePage,
+    required this.changePage
   });
 
   final Function(int, int) changePage;
@@ -32,8 +30,7 @@ class Lobby extends StatefulWidget {
 
 class LobbyState extends State<Lobby> {
 
-  _Player? you;
-  _Player? enemy;
+  int playercount = 0;
 
   bool listening = false;
 
@@ -44,47 +41,20 @@ class LobbyState extends State<Lobby> {
 
   void listenForServer() {
 
+    print('listening');
     listening = true;
+<<<<<<< HEAD
 
     SocketClient.listenFor('hoststartgame', (selectedMap) => Navigator.of(context).push(
       MaterialPageRoute(builder: (context) => GameScreen(map: selectedMap))
+=======
+    SocketClient.listenFor('hoststartgame', (p0) => Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => const GameScreen())
+>>>>>>> parent of c62bfa5 (hosting FINALLY WORKS and pictures)
     ));
 
-    SocketClient.listenFor('gameinformation', (information) {
-
-
-      print(information['you']);
-      print(information['you'].runtimeType);
-
-      Map youData = information['you'];
-      Map? enemyData = information['enemy'];
-
-      you = _Player(
-        username: youData['username'],
-        picture: youData['picture'],
-        isHost: youData['isHost'],
-      );
-
-      enemy = enemyData == null ? null : _Player(
-        username: enemyData['username'], 
-        picture: enemyData['picture'],
-        isHost: enemyData['isHost'],
-      );
-
-    });
-
     SocketClient.listenFor('userjoinedlobby', (information) {
-      if(mounted) {
-        setState(() => enemy = _Player(
-          username: information['username'],
-          picture: information['picture'],
-          isHost: information['isHost'],
-        ));
-      }
-    });
-
-    SocketClient.listenFor('playerleave', (playerList) {
-      setState(() => enemy = null);
+      if(mounted) setState(() => playercount = information['playercount']);
     });
   }
 
@@ -103,6 +73,7 @@ class LobbyState extends State<Lobby> {
   @override
   Widget build(BuildContext context) {
 
+<<<<<<< HEAD
     return MapAlike(
       factor: 0.1,
       child: SizedBox(
@@ -201,11 +172,43 @@ class LobbyState extends State<Lobby> {
             ),
           ],
         ),
+=======
+    return SizedBox(
+      width: MediaQuery.sizeOf(context).width,
+      height: MediaQuery.sizeOf(context).height,
+
+      child: Column(
+        children: [
+          Row(
+            children: [
+              for(int i = 0; i < playercount; i++)
+                const _Player(username: 'beautiful name :)')
+            ],
+          ),
+        
+          ElevatedButton(
+            onPressed: () {
+              SocketClient.startGame();
+            }, 
+            child: const Text('START GAME (IF YOURE HOST)')
+          ),
+
+          ElevatedButton(
+            onPressed: () {
+              setState(() => playercount = 0);
+              SocketClient.stopConnection();
+              widget.changePage(1, 2);
+            }, 
+            child: const Text('Leave lobby :(')
+          ),
+        ],
+>>>>>>> parent of c62bfa5 (hosting FINALLY WORKS and pictures)
       ),
     );
   }
 }
 
+<<<<<<< HEAD
 class _SelectableMap extends StatelessWidget {
   const _SelectableMap({
     super.key,
@@ -245,19 +248,19 @@ class _SelectableMap extends StatelessWidget {
 
 class _PlayerWidget extends StatelessWidget {
   const _PlayerWidget({
+=======
+class _Player extends StatelessWidget {
+  const _Player({
+>>>>>>> parent of c62bfa5 (hosting FINALLY WORKS and pictures)
     super.key,
     required this.username,
-    required this.picture,
-    required this.isEnemy,
   });
 
   final String username;
-  final int picture;
-  final bool isEnemy;
-  
 
   @override
   Widget build(BuildContext context) {
+<<<<<<< HEAD
     return Container(
       width: 500,
       
@@ -294,6 +297,18 @@ class _PlayerWidget extends StatelessWidget {
           Text(isEnemy ? 'YOUR ENEMY!' : 'YOU!'),
         ],
       ),
+=======
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.all(10),
+        height: 700,
+        color: Colors.green.withOpacity(.7),
+      
+        child: Center(
+          child: Text(username),
+        ),
+      )
+>>>>>>> parent of c62bfa5 (hosting FINALLY WORKS and pictures)
     );
   }
 }
