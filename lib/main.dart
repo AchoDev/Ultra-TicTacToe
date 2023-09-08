@@ -107,14 +107,9 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
 
     _audioPlayer = AudioPlayer();
 
-    _audioPlayer.onPlayerComplete.listen(
-      (event) {
-        _audioPlayer.play(DeviceFileSource('audio/menumusic.mp3'));
-      }
-    );
-
     _audioPlayer.play(DeviceFileSource('audio/menumusic.mp3'));
 
+    
   }
 
   @override
@@ -262,28 +257,20 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                       changePage: changePage,
                     ),
 
-                    SingleplayerScreen(
-                      changePage: changePage
-                    )
-
-                  ],
-                ),
-
 
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     SetupScreen(
                       changePage: changePage,
+                      yPosition: 2,
                     ),
                     JoinServerScreen(
                       changePage: changePage,
                       lobbyKey: lobbyKey,
                     ),
 
-                    SetupScreen(
-                      changePage: changePage,
-                    ),
+                    BlankPage(),
 
                   ],
                 ),
@@ -291,17 +278,21 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    SetupScreen(
+                      changePage: changePage,
+                      yPosition: 3,
+                    ),
                     Lobby(
                       key: lobbyKey,
                       changePage: changePage,
                     ),
+                    BlankPage(),
                   ],
                 ),
 
               ],
             ),
           ),
-        
         ],
       ),
     );
@@ -363,20 +354,20 @@ class _MainScreenState extends State<MainScreen> {
                     changePage: widget.changePage, 
                     pageX: 1,
                     pageY: 1,
-                    image: const AssetImage('images/playbutton.png'),
+                    image: const AssetImage('assets/images/playbutton.png'),
                   ),
                   _MenuButton(
                     changePage: widget.changePage, 
                     pageX: 2,
                     pageY: 0, 
-                    image: const AssetImage('images/settingsbutton.png')
+                    image: const AssetImage('assets/images/settingsbutton.png')
                   ),
             
                   _MenuButton(
                     changePage: widget.changePage, 
                     pageX: 0,
                     pageY: 0,
-                    image: const AssetImage('images/creditsbutton.png')
+                    image: const AssetImage('assets/images/creditsbutton.png')
                   ),
                 ],
               ),
@@ -490,7 +481,7 @@ class _LogoState extends State<Logo> with SingleTickerProviderStateMixin{
           scale: _scaleAnimation.value,
           child: const SizedBox(
             width: 500,
-            child: Image(image: AssetImage('images/logo.png'))
+            child: Image(image: AssetImage('assets/images/logo.png'))
           ),
         );
       }
