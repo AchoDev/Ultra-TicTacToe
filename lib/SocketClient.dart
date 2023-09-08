@@ -69,8 +69,13 @@ class SocketClient {
     }));
   }
 
+<<<<<<< Updated upstream
   static void startGame() {
     _socket!.emit('startgame');
+=======
+  static void startGame(String map) {
+    _socket!.emit('startgame', map);
+>>>>>>> Stashed changes
   }
 
   static Process? _nodeProcess;

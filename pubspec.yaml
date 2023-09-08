@@ -37,10 +37,14 @@ dependencies:
   cupertino_icons: ^1.0.2
   google_fonts: ^5.1.0
   audioplayers: ^5.1.0
+<<<<<<< Updated upstream
+=======
   
   socket_io_client: 1.0.2
   socket_io_common: ^1.0.0-nullsafety.1
   socket_io: ^1.0.1
+  flutter_gif: ^0.0.4
+>>>>>>> Stashed changes
 
 dev_dependencies:
   flutter_test:
@@ -66,9 +70,16 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+<<<<<<< Updated upstream
     - images/
     - audio/
-    - userpictures/
+=======
+    - assets/images/
+    - assets/audio/
+    - assets/userpictures/
+    - assets/maps/
+    - assets/animations/
+>>>>>>> Stashed changes
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
