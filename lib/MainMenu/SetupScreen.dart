@@ -5,9 +5,11 @@ import '../shared/PagejumpButton.dart';
 class SetupScreen extends StatelessWidget {
   const SetupScreen({
     super.key,
-    required this.changePage
+    required this.changePage,
+    required this.yPosition,
   });
 
+  final int yPosition;
   final Function(int, int) changePage;
 
   @override
@@ -25,7 +27,7 @@ class SetupScreen extends StatelessWidget {
           PagejumpButton(
             changePage: changePage, 
             pageX: 1, 
-            pageY: 2, 
+            pageY: yPosition, 
             text: 'Back'
           ),
 
