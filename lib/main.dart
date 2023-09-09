@@ -7,6 +7,7 @@ import 'package:audioplayers/audioplayers.dart';
 
 
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ultra_tictactoe/SoundManager.dart';
 
 import 'MainMenu/Lobby.dart';
 import 'shared/MapAlike.dart';
@@ -105,11 +106,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
 
     _backgroundController.repeat();
 
-    _audioPlayer = AudioPlayer();
-
-    _audioPlayer.play(DeviceFileSource('audio/menumusic.mp3'));
-
-    
+    // SoundManager.addSound('menumusic').play(loop: false);
   }
 
   @override
@@ -123,8 +120,6 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
   late Tween<double> _backgroundTween;
 
   late Animation<double> animation;
-
-  late AudioPlayer _audioPlayer;
 
   List<IconData> icons = List.generate(500, (index) => IconData(int.parse('0xe${Random().nextInt(9)}b${Random().nextInt(9)}'), fontFamily: 'MaterialIcons'));
 
@@ -232,7 +227,6 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
 
                     MainScreen(
                       changePage: changePage,
-                      audioPlayer: _audioPlayer,
                       turnBackgroundOff: turnBackgroundOff,
                     ),
                       
@@ -256,6 +250,11 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                     PlayScreen(
                       changePage: changePage,
                     ),
+                    SingleplayerScreen(
+                      changePage: changePage
+                    ),
+                  ]
+                ),
 
 
                 Row(
@@ -300,21 +299,22 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
 }
 
 
-
-
-
-
+class BlankPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    width: MediaQuery.sizeOf(context).width,
+    height: MediaQuery.sizeOf(context).height,
+  );
+}
 
 class MainScreen extends StatefulWidget {
   const MainScreen({
     super.key,
     required this.changePage,
-    required this.audioPlayer,
     required this.turnBackgroundOff,
   });
   
   final Function(int, int) changePage;
-  final AudioPlayer audioPlayer;
 
   final VoidCallback turnBackgroundOff;
 
@@ -342,7 +342,6 @@ class _MainScreenState extends State<MainScreen> {
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
-            
             
             children: [
               const Logo(),
@@ -373,7 +372,7 @@ class _MainScreenState extends State<MainScreen> {
               ),
           
               ElevatedButton(
-                onPressed: () => widget.audioPlayer.stop(), 
+                onPressed: () => SoundManager.stopSound('menumusic'), 
                 child: const Text('stop music')
               ),
               ElevatedButton(
@@ -452,7 +451,7 @@ class _LogoState extends State<Logo> with SingleTickerProviderStateMixin{
 
     _titleController = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: (60000 / 170 / 2).toInt())
+      duration: const Duration(milliseconds: (60000 / 175 ~/ 2))
     );
 
     _scaleAnimation = Tween<double>(begin: 1, end: 1.4).animate(

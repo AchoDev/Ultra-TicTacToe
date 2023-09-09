@@ -4,7 +4,7 @@ import 'dart:math';
 import 'dart:io';
 
 import 'package:socket_io_client/socket_io_client.dart' as io;
-import 'Server.dart';
+import 'Game/Server.dart';
 
 class SocketClient {
   static io.Socket? _socket;

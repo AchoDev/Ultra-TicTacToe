@@ -8,7 +8,7 @@ import 'package:ultra_tictactoe/SocketClient.dart';
 import 'package:ultra_tictactoe/shared/JumpOnHover.dart';
 import 'package:ultra_tictactoe/shared/MapAlike.dart';
 import 'package:ultra_tictactoe/shared/PagejumpButton.dart';
-import '../GameScreen.dart';
+import '../Game/GameScreen.dart';
 
 class _Player {
   final String username;
@@ -59,17 +59,19 @@ class LobbyState extends State<Lobby> {
       Map youData = information['you'];
       Map? enemyData = information['enemy'];
 
-      you = _Player(
-        username: youData['username'],
-        picture: youData['picture'],
-        isHost: youData['isHost'],
-      );
+      setState(() {
+        you = _Player(
+          username: youData['username'],
+          picture: youData['picture'],
+          isHost: youData['isHost'],
+        );
 
-      enemy = enemyData == null ? null : _Player(
-        username: enemyData['username'], 
-        picture: enemyData['picture'],
-        isHost: enemyData['isHost'],
-      );
+        enemy = enemyData == null ? null : _Player(
+          username: enemyData['username'], 
+          picture: enemyData['picture'],
+          isHost: enemyData['isHost'],
+        );
+      });
 
     });
 
@@ -235,7 +237,7 @@ class _SelectableMap extends StatelessWidget {
             ),
             // color: selected ? Colors.green : Colors.transparent,
             height: 180,
-            child: Image(image: AssetImage('assets/maps/$name.png'),),
+            child: Image(image: AssetImage('assets/maps/$name/$name.png'),),
           ),
         ),
       ),

@@ -21,8 +21,8 @@ class _MapAlikeState extends State<MapAlike> {
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      onHover: (event) => {
-        setState(() => mousePosition = event.position)
+      onHover: (event) {
+        setState(() => mousePosition = event.position);
       },
       child: Transform.translate(
         offset: (mousePosition - Offset(MediaQuery.sizeOf(context).width / 2, MediaQuery.sizeOf(context).height / 2)) * -widget.factor,
