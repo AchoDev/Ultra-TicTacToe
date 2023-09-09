@@ -23,6 +23,7 @@ class GameServer {
   }
 
   static List<_Player> _players = List.empty(growable: true);
+  static String currentMap = '';
 
   static bool startServer() {
     try{
@@ -31,6 +32,12 @@ class GameServer {
 
         socket.on('startgame', (data) {
           if(socket == _players[0].socket) {io.emit('hoststartgame', data);}
+        });
+
+        socket.on('changeMap', (String data) {
+          currentMap = data;
+
+          socket.broadcast.emit('hostchangedmap', data);
         });
 
         socket.on('playerInformation', (data) {
@@ -55,9 +62,7 @@ class GameServer {
                 'picture': _players[0].picture,
                 'isHost': true
               },
-              'rules': {
-                'map': 0,
-              }
+              'map': currentMap,
             }
           );
 

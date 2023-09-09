@@ -2,21 +2,28 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:ultra_tictactoe/SoundManager.dart';
+import 'package:ultra_tictactoe/shared/BeatAnimation.dart';
 import 'package:ultra_tictactoe/shared/MapAlike.dart';
 import './SmallTTTField.dart';
 import 'dart:math';
+
+import 'package:vector_math/vector_math_64.dart' as vm;
 
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
 import '../SocketClient.dart' as client;
 
 class GameScreen extends StatefulWidget {
-  const GameScreen({
+  GameScreen({
     super.key,
-    required this.map,
-  });
+    required this.gameInformation,
+  }) {
+    map = gameInformation['map'];
+  }
 
-  final String map;
+  final Map gameInformation;
+  
+  late final String map;
 
   @override
   State<GameScreen> createState() => _GameScreenState();
@@ -208,8 +215,8 @@ class _GameScreenState extends State<GameScreen> {
 
     SoundManager.stopSound('menumusic');
 
-    SoundManager.addSound('${widget.map}_ambience').play(loop: true);
-    SoundManager.addSound('${widget.map}_music', volume: 0);
+    // SoundManager.addSound('${widget.map}_ambience').play(loop: true);
+    // SoundManager.addSound('${widget.map}_music', volume: 0);
 
     fieldKeys = List.generate(9, (index) => GlobalObjectKey<SmallTTTFieldState>(index));
   }
@@ -219,6 +226,9 @@ class _GameScreenState extends State<GameScreen> {
 
     const Color borderColor = const Color.fromARGB(255, 218, 218, 218);
     const Color notSelectedColor = Color.fromARGB(19, 255, 0, 0);
+
+    Map you = widget.gameInformation['you'];
+    // Map enemy = widget.gameInformation['enemy'];
 
     return Scaffold(
       body: SizedBox(
@@ -303,7 +313,8 @@ class _GameScreenState extends State<GameScreen> {
             ),
           
             Center(
-              child: SizedBox(
+              child: Container(
+                padding: const EdgeInsets.all(40),
                 width: MediaQuery.sizeOf(context).width,
                 height: MediaQuery.sizeOf(context).height,
 
@@ -311,27 +322,107 @@ class _GameScreenState extends State<GameScreen> {
                   children: [
                     Align(
                       alignment: Alignment.topCenter,
-                      child: Row(children: [
-                        CircleAvatar(),
-                    
-                        Text('VS'),
-                    
-                        CircleAvatar(),
-                      ],),
+                      child: BeatAnimation(
+                        bpm: 160,
+                        scaleAmount: currentPhase != 0 ? 1 + currentPhase * 0.1 : 1,
+                        subdivision: 1,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircleAvatar(
+                              foregroundImage: AssetImage('assets/userpictures/${you['picture']}.jpeg'),
+                            ),
+                        
+                            Text('VS'),
+                        
+                            CircleAvatar(),
+                        ],),
+                      ),
                     ),
-
+                
                     Align(
                       alignment: Alignment.topRight,
                       child: IconButton(
-                        onPressed: () => print('pause menu'), 
+                        onPressed: () => enemyCheckField(1, Random().nextInt(9)), 
                         icon: const Icon(Icons.menu),
                       ),
                     ),
-
-                    Text('PLAYERS TURN'),
-                    Text('ENEMY TURN'),
-
-
+                
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          BeatAnimation(
+                            bpm: 160,
+                            scaleAmount: currentPhase != 0 ? 1 + currentPhase * 0.1 : 1,
+                            subdivision: 1,
+                            child: AnimatedContainer(
+                              curve: Curves.elasticOut,
+                              duration: const Duration(milliseconds: 1300),
+                              transform: Matrix4.identity()..setTranslation(vm.Vector3( 
+                                0, yourTurn ? 0 : 100, 0)),
+                              child: Stack(
+                                children: [
+                                  Text(
+                                    'PLAYERS TURN',
+                                    style: TextStyle(
+                                      fontSize: 40,
+                                      foreground: Paint()
+                                        ..style = PaintingStyle.stroke
+                                        ..strokeWidth = 6
+                                        ..color = const Color.fromARGB(255, 255, 255, 255),
+                                    ),
+                                  ),
+                                  Text(
+                                    'PLAYERS TURN',
+                                    style: TextStyle(
+                                      fontSize: 40,
+                                      color: Colors.blue
+                                    ),
+                                  ),
+                                ],
+                              )
+                            ),
+                          ),
+                
+                          BeatAnimation(
+                            bpm: 160,
+                            scaleAmount: currentPhase != 0 ? 1 + currentPhase * 0.1 : 1,
+                            subdivision: 1,
+                            child: AnimatedContainer(
+                              curve: Curves.elasticOut,
+                              duration: const Duration(milliseconds: 1300),
+                              transform: Matrix4.identity()..setTranslation(vm.Vector3( 
+                                0, yourTurn ? 100 : 0, 0)),
+                              child: Stack(
+                                children: [
+                                  Text(
+                                    'ENEMY TURN',
+                                    style: TextStyle(
+                                      fontSize: 40,
+                                      foreground: Paint()
+                                        ..style = PaintingStyle.stroke
+                                        ..strokeWidth = 6
+                                        ..color = const Color.fromARGB(255, 255, 255, 255),
+                                    ),
+                                  ),
+                                  Text(
+                                    'ENEMY TURN',
+                                    style: TextStyle(
+                                      fontSize: 40,
+                                      color: Colors.red
+                                    ),
+                                  ),
+                                ],
+                              )
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                
+                
                     Visibility(
                     visible: winner != 0,
                     child: Container(

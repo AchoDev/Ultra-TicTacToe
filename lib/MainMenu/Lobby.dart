@@ -47,7 +47,20 @@ class LobbyState extends State<Lobby> {
     listening = true;
 
     SocketClient.listenFor('hoststartgame', (selectedMap) => Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => GameScreen(map: selectedMap))
+      MaterialPageRoute(builder: (context) => GameScreen(gameInformation: {
+        'you': {
+          'username': you!.username,
+          'picture': you!.picture,
+          'isHost': you!.isHost,
+        },
+        // TODO change back to enemy when done with design
+        'enemy': {
+          'username': you!.username,
+          'picture': you!.picture,
+          'isHost': you!.isHost,
+        },
+        'map': selectedMap,
+      },))
     ));
 
     SocketClient.listenFor('gameinformation', (information) {

@@ -31,11 +31,23 @@ class _BeatAnimationState extends State<BeatAnimation> with SingleTickerProvider
       duration: Duration(milliseconds: 60000 / widget.bpm ~/ widget.subdivision)
     );
 
-    _scaleAnimation = Tween<double>(begin: 1, end: 1.4).animate(
+    _scaleAnimation = Tween<double>(begin: 1, end: widget.scaleAmount).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOut)
     );
 
     _controller.repeat(reverse: true);
+  }
+
+  @override
+  void didUpdateWidget(BeatAnimation oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if(oldWidget.scaleAmount != widget.scaleAmount) {
+      setState(() {
+        _scaleAnimation = Tween<double>(begin: 1, end: widget.scaleAmount).animate(
+          CurvedAnimation(parent: _controller, curve: Curves.easeOut)
+        );
+      });
+    }
   }
 
   @override

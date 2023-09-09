@@ -43,8 +43,6 @@ class _GifWidgetState extends State<GifWidget> {
           frameRate: 120,
           controller: _controller,
           fadeDuration: Duration.zero,
-          height: 200,
-          width: 200,
         ),
 
         Visibility(
