@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:ultra_tictactoe/shared/GifWidget.dart';
 import 'SmallTTTFieldButton.dart';
@@ -17,6 +19,8 @@ class SmallTTTField extends StatefulWidget {
     required this.winningMoves,
   
     required this.map,
+
+    required this.hoveredColor,
   });
 
   final String map;
@@ -31,6 +35,8 @@ class SmallTTTField extends StatefulWidget {
   final String enemyCheckedAsset;
 
   final List<List<int>> winningMoves;
+
+  final Color hoveredColor;
 
   @override
   State<SmallTTTField> createState() => SmallTTTFieldState();
@@ -120,7 +126,9 @@ class SmallTTTFieldState extends State<SmallTTTField> {
           checkWinner: () {
             checkWinner(); 
             widget.checkGlobalWinner();
-          }
+          },
+
+          hoveredColor: widget.hoveredColor,
         )
     ];
   }

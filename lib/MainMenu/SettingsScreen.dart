@@ -1,16 +1,19 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:ultra_tictactoe/SoundManager.dart';
 
 import '../shared/MapAlike.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
     super.key,
-    required this.changePage
+    required this.changePage,
+    required this.turnBackgroundOff,
   });
 
   final Function(int, int) changePage;
+  final Function turnBackgroundOff;
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -39,34 +42,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 fontSize: 30
               ),
             ),
-    
-            Text(
+          
+            const Text(
               'Music Volume',
-              style: GoogleFonts.pressStart2p(
-    
+            ),
+          
+            SizedBox(
+              width: 500,
+              child: Slider(
+                value: SoundManager.globalVolume, 
+                onChanged: (value) => setState(() => SoundManager.setGlobalVolume(value))
               ),
             ),
-    
-            Slider(
-              value: musicVolume, 
-              onChanged: (value) => setState(() => musicVolume = value)
-            ),
-    
+          
             Text(
               'Sound Volume',
               style: GoogleFonts.pressStart2p(
-    
               ),
             ),
-    
-            Slider(
-              value: soundVolume, 
-              onChanged: (value) => setState(() => soundVolume = value)
+          
+            SizedBox(
+              width: 500,
+              child: Slider(
+                value: SoundManager.globalSFXVolume, 
+                onChanged: (value) => setState(() => SoundManager.setSFXVolume(value))
+              ),
             ),
-    
+          
+            ElevatedButton(
+                  onPressed: () => widget.turnBackgroundOff(), 
+              child: const Text('turn background off')
+            ),
+
             ElevatedButton(
               onPressed: () => widget.changePage(1, 0), 
-              child: Text('back')
+              child: Text('Back')
             ),
           ],
         ),

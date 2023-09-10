@@ -52,9 +52,8 @@ class _BeatAnimationState extends State<BeatAnimation> with SingleTickerProvider
 
   @override
   void dispose() {
-    super.dispose();
-
     _controller.dispose();
+    super.dispose();
   }
 
   late Animation<double> _scaleAnimation;

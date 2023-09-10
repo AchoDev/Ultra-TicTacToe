@@ -12,6 +12,8 @@ class SmallTTTFieldButton extends StatefulWidget {
     required this.enemySelectedAsset,
 
     required this.checkWinner,
+  
+    required this.hoveredColor,
   });
 
   final String selectedAsset;
@@ -21,6 +23,8 @@ class SmallTTTFieldButton extends StatefulWidget {
   final int localPosition;
 
   final Function checkWinner;
+
+  final Color hoveredColor;
 
   @override
   State<SmallTTTFieldButton> createState() => SmallTTTFieldButtonState();
@@ -67,7 +71,7 @@ class SmallTTTFieldButtonState extends State<SmallTTTFieldButton> {
         width: 10,
         height: 10,
         decoration: BoxDecoration(
-          color: hovered && !selected ? Color.fromARGB(78, 133, 133, 133) : Colors.transparent,
+          color: hovered && !selected ? widget.hoveredColor : Colors.transparent,
           borderRadius: BorderRadius.circular(15),
           // border: Border(
           //   right: i == 2 || i == 5 || i == 8 ? BorderSide.none : BorderSide(width: borderWidth),

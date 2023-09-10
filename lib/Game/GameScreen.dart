@@ -1,8 +1,13 @@
 
+
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:ultra_tictactoe/Game/WinningScreen.dart';
 import 'package:ultra_tictactoe/SoundManager.dart';
 import 'package:ultra_tictactoe/shared/BeatAnimation.dart';
+import 'package:ultra_tictactoe/shared/JumpOnHover.dart';
 import 'package:ultra_tictactoe/shared/MapAlike.dart';
 import './SmallTTTField.dart';
 import 'dart:math';
@@ -17,19 +22,41 @@ class GameScreen extends StatefulWidget {
   GameScreen({
     super.key,
     required this.gameInformation,
+    required this.changePage,
   }) {
     map = gameInformation['map'];
   }
 
   final Map gameInformation;
-  
+
+  Function(int, int) changePage;
+
   late final String map;
 
   @override
   State<GameScreen> createState() => _GameScreenState();
 }
 
-class _GameScreenState extends State<GameScreen> { 
+class _GameScreenState extends State<GameScreen> with SingleTickerProviderStateMixin{ 
+
+  void leaveGame() {
+    SoundManager.releaseSound('${widget.map}_music');
+    SoundManager.releaseSound('${widget.map}_ambience');
+    SoundManager.playSound('menumusic');
+    Navigator.of(context).pop();
+    client.SocketClient.stopConnection();
+    widget.changePage(1, 0);
+  }
+
+  bool _onKey(KeyEvent event) {
+    final key = event.logicalKey.keyLabel;
+
+    if (event is KeyUpEvent && key == 'Escape') {
+      setState(() => pauseMenuOpened = !pauseMenuOpened);
+    }
+    
+    return false;
+  }
 
   void checkWinner() {
     final List<int> currentLayout = List.empty(growable: true);
@@ -70,17 +97,60 @@ class _GameScreenState extends State<GameScreen> {
       return counter == 3;
     }
 
+    Map you = widget.gameInformation['you'];
+    Map enemy = widget.gameInformation['enemy'];
+
     for(List<int> winningMove in winningMoves) {
+      
+      void openWinningPage(Map winner, Map loser) async{
+        SoundManager.releaseSound('${widget.map}_music');
+        SoundManager.releaseSound('${widget.map}_ambience');
+
+        int random = Random().nextInt(3);
+
+        SoundManager.addSound('win${random + 1}').play();
+        // SoundManager.addSound('teleport').play();
+        SoundManager.addSound('explosion').play();
+
+        _scrollController.stop();
+
+        await Future.delayed(const Duration(seconds: 3));
+        
+        SoundManager.findSound('win${random + 1}')!.release();
+        // SoundManager.findSound('teleport')!.release();
+        SoundManager.findSound('explosion')!.release();
+
+        Navigator.of(context).pop();
+        Navigator.of(context).push(
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) => WinningScreen(
+              winner: winner['username'],
+              winnerPicture: winner['picture'],
+              loser: loser['username'],
+              loserPicture: loser['picture'],
+            ),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              const begin = Offset(1.0, 0.0);
+              const end = Offset.zero;
+              const curve = Curves.ease;
+
+              var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+              return SlideTransition(
+                position: animation.drive(tween),
+                child: child,
+              );
+            },
+          )
+        );
+      }
+
       if(_checkSingleMove(winningMove, 0)) {
-        setState(() {
-          winner = 1;
-        });
+        openWinningPage(you, enemy);
       }
 
       if(_checkSingleMove(winningMove, 1)) {
-        setState(() {
-          winner = 2;
-        });
+        openWinningPage(enemy, you);
       }
     }
   }
@@ -119,14 +189,21 @@ class _GameScreenState extends State<GameScreen> {
         1, 0, 0, ],
     ];
 
-  bool yourTurn = true;
+  late bool yourTurn;
   int currentField = 9;
 
   bool movePlayed = false;
 
   int winner = 0;
 
+  Map<String, List> bpmMap = {
+    'palace': [160, const Color.fromARGB(59, 0, 0, 0), const Color.fromARGB(48, 0, 0, 0)],
+    'classroom': [170, const Color.fromARGB(88, 255, 255, 255), const Color.fromARGB(136, 14, 255, 22)],
+    'night': [123, const Color.fromARGB(78, 0, 77, 192), const Color.fromARGB(179, 0, 140, 255)],
+  };
+
   void checkField(int globalPosition, int localPosition) {
+    if(!mounted) return;
     setState(() {
       yourTurn = false;
 
@@ -148,17 +225,17 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void enemyCheckField(int globalPosition, int localPosition) {
+    if(!mounted) return;
      setState(() {
       yourTurn = true;
 
       setPhase(1);
 
+      fieldKeys[globalPosition].currentState?.crossEnemyField(localPosition);
       if(fieldKeys[localPosition].currentState!.checked) currentField = 9;
       else currentField = localPosition;
     });
 
-    print('enemy checked pos');
-    fieldKeys[globalPosition].currentState?.crossEnemyField(localPosition);
   }
 
   late List<Container> fields;
@@ -166,6 +243,8 @@ class _GameScreenState extends State<GameScreen> {
   late final List<GlobalObjectKey<SmallTTTFieldState>> fieldKeys;
 
   int currentPhase = 0;
+
+  bool pauseMenuOpened = false;
 
   void setPhase(int phase) {
     if(currentPhase >= 4) return;
@@ -182,16 +261,16 @@ class _GameScreenState extends State<GameScreen> {
     switch(currentPhase) {
       case 1:
         music.play(loop: true);
-        music.setVolume(10 / 100);
+        music.setVolumeSmooth(5 / 100);
         break;
       case 2:
-        music.setVolume(30 / 100);
+        music.setVolumeSmooth(20 / 100);
         break;
       case 3:
-        music.setVolume(60 / 100);
+        music.setVolumeSmooth(50 / 100);
         break;
       case 4:
-        music.setVolume(1);
+        music.setVolumeSmooth(1);
         break;
       default:
         throw RangeError('Phase range is above 4');
@@ -199,10 +278,23 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   @override
+  void dispose() {
+    ServicesBinding.instance.keyboard.removeHandler(_onKey);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
 
+    ServicesBinding.instance.keyboard.addHandler(_onKey);
+
+    yourTurn = widget.gameInformation['you']['isHost'];
+
     client.SocketClient.listenFor('playermove', (res) {
+
+      print('MOVE PLAYERD');
       
       if(movePlayed) {
         movePlayed = false;
@@ -213,22 +305,51 @@ class _GameScreenState extends State<GameScreen> {
       enemyCheckField(res[0], res[1]);
     });
 
+    client.SocketClient.listenFor('playerleave', (p0) {
+      showDialog(
+        context: context, 
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text('Enemy left the game'),
+          actions: [
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(), 
+              child: const Text('Oki :3')
+            )
+          ],
+          
+        )
+      ).then((_) => leaveGame());
+    });
+
     SoundManager.stopSound('menumusic');
 
-    // SoundManager.addSound('${widget.map}_ambience').play(loop: true);
-    // SoundManager.addSound('${widget.map}_music', volume: 0);
+    SoundManager.addSound('${widget.map}_ambience', type: SoundType.SoundEffect).play(loop: true);
+    SoundManager.addSound('${widget.map}_music', volume: 0);
 
     fieldKeys = List.generate(9, (index) => GlobalObjectKey<SmallTTTFieldState>(index));
+  
+    _scrollController = AnimationController(
+      duration: const Duration(seconds: 5), 
+      vsync: this,
+    );
+    _scrollController.repeat();
   }
+
+  late final AnimationController _scrollController;
+  late Animation _scrollAnimation;
 
   @override
   Widget build(BuildContext context) {
 
+    _scrollAnimation = Tween<double>(
+      begin: -MediaQuery.sizeOf(context).height * 1.3 / 2, 
+      end: MediaQuery.sizeOf(context).height * 1.3 / 2).animate(_scrollController);
+
     const Color borderColor = const Color.fromARGB(255, 218, 218, 218);
-    const Color notSelectedColor = Color.fromARGB(19, 255, 0, 0);
+    
 
     Map you = widget.gameInformation['you'];
-    // Map enemy = widget.gameInformation['enemy'];
+    Map enemy = widget.gameInformation['enemy'];
 
     return Scaffold(
       body: SizedBox(
@@ -241,16 +362,24 @@ class _GameScreenState extends State<GameScreen> {
               child: Stack(
                 children: [
 
-                  Center(
-                    child: Transform.scale(
-                      scaleY: 1.3,
-                      scaleX: 1.45,
-                      child: Image.asset('assets/maps/${widget.map}/${widget.map}_back.png', fit: BoxFit.fill,)
-                    ),
+                  AnimatedBuilder(
+                    animation: _scrollAnimation,
+                    builder: (context, child) {
+                      return Center(
+                        child: Transform.translate(
+                          offset: Offset(0, widget.map == 'night' ? _scrollAnimation.value : 0),
+                          child: Transform.scale(
+                            scaleY: 1.3 * (widget.map == 'night' ? 2 : 1),
+                            scaleX: 1.45 * (widget.map == 'night' ? 2 : 1),
+                            child: Image.asset('assets/maps/${widget.map}/${widget.map}_back.png', fit: BoxFit.fill,)
+                          ),
+                        ),
+                      );
+                    }
                   ),
 
                   MapAlike(
-                    factor: 0.03,
+                    factor: 0.06,
                     child: Stack(
                       children: [
                         SizedBox(
@@ -260,8 +389,7 @@ class _GameScreenState extends State<GameScreen> {
                   
                         Center(
                           child: IgnorePointer(
-                            // ignoring: !yourTurn,
-                            ignoring: false,
+                            ignoring: !yourTurn,
                             child: ConstrainedBox(
                               constraints: BoxConstraints.tight( Size(
                                 MediaQuery.sizeOf(context).height / 1.45,
@@ -272,9 +400,9 @@ class _GameScreenState extends State<GameScreen> {
                                 children: [
                                   for(int i = 0; i < 9; i++)
                                     Container(
-                                      margin: const EdgeInsets.all(2),
+                                      margin: const EdgeInsets.all(1),
                                       decoration: BoxDecoration(
-                                        color: currentField == 9 || currentField == i ? Colors.transparent : notSelectedColor,
+                                        color: currentField == 9 || currentField == i ? Colors.transparent : bpmMap[widget.map]![1],
                                         borderRadius: BorderRadius.circular(30),
                                         // boxShadow: [ BoxShadow(
                                         //   color: currentField == 9 ||currentField == i ? Colors.transparent : notSelectedColor,
@@ -296,6 +424,8 @@ class _GameScreenState extends State<GameScreen> {
                                         winningMoves: winningMoves,
                           
                                         map: widget.map,
+
+                                        hoveredColor: bpmMap[widget.map]![2],
                                       )
                                     )
                                 ]
@@ -323,19 +453,96 @@ class _GameScreenState extends State<GameScreen> {
                     Align(
                       alignment: Alignment.topCenter,
                       child: BeatAnimation(
-                        bpm: 160,
+                        bpm: bpmMap[widget.map]![0],
                         scaleAmount: currentPhase != 0 ? 1 + currentPhase * 0.1 : 1,
                         subdivision: 1,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            CircleAvatar(
-                              foregroundImage: AssetImage('assets/userpictures/${you['picture']}.jpeg'),
+                            AnimatedScale(
+                              curve: Curves.bounceOut,
+                              duration: const Duration(milliseconds: 500),
+                              scale: yourTurn ? 1.3 : 0.75,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  CircleAvatar(
+                                    radius: 70,
+                                    foregroundImage: AssetImage('assets/userpictures/${you['picture']}.jpeg'),
+                                  ),
+                                  Text(
+                                    you['username'],
+                                    style: const TextStyle(
+                                      color: Colors.blue
+                                    ),
+                                  )
+                                ],
+                              ),
                             ),
                         
-                            Text('VS'),
+                             Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 60.0),
+                              child: Stack(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'VS',
+                                        style: TextStyle(
+                                          fontSize: 40,
+                                          foreground: Paint()
+                                            ..style = PaintingStyle.stroke
+                                            ..strokeWidth = 6
+                                            ..color = const Color.fromARGB(255, 255, 255, 255),
+                                        ),
+                                      ),
+                                      
+                                    ],
+                                  ),
+                                  const Row(
+                                    children: [
+                                      Text(
+                                        'V',
+                                        style: TextStyle(
+                                          fontSize: 40,
+                                          color: Colors.blue,
+                                        ),
+                                      ),
+                                      Text(
+                                        'S',
+                                        style: TextStyle(
+                                          fontSize: 40,
+                                          color: Colors.red,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
                         
-                            CircleAvatar(),
+                            AnimatedScale(
+                              duration: const Duration(milliseconds: 500),
+                              curve: Curves.bounceOut,
+                              scale: !yourTurn ? 1.3 : 0.75,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  CircleAvatar(
+                                    radius: 70,
+                                    foregroundImage: AssetImage('assets/userpictures/${enemy['picture']}.jpeg'),
+                                  ),
+
+                                  Text(
+                                    enemy['username'],
+                                    style: const TextStyle(
+                                      color: Colors.red
+                                    ),
+                                  ),
+                                  
+                                ],
+                              ),
+                            ),
                         ],),
                       ),
                     ),
@@ -343,8 +550,11 @@ class _GameScreenState extends State<GameScreen> {
                     Align(
                       alignment: Alignment.topRight,
                       child: IconButton(
-                        onPressed: () => enemyCheckField(1, Random().nextInt(9)), 
-                        icon: const Icon(Icons.menu),
+
+                        
+                        color: Colors.white,
+                        onPressed: () => setState(() => pauseMenuOpened = true), 
+                        icon: const Icon(Icons.menu, size: 70,),
                       ),
                     ),
                 
@@ -354,9 +564,9 @@ class _GameScreenState extends State<GameScreen> {
                         alignment: Alignment.center,
                         children: [
                           BeatAnimation(
-                            bpm: 160,
+                            bpm: bpmMap[widget.map]![0],
                             scaleAmount: currentPhase != 0 ? 1 + currentPhase * 0.1 : 1,
-                            subdivision: 1,
+                            subdivision: 1 / 2,
                             child: AnimatedContainer(
                               curve: Curves.elasticOut,
                               duration: const Duration(milliseconds: 1300),
@@ -365,7 +575,7 @@ class _GameScreenState extends State<GameScreen> {
                               child: Stack(
                                 children: [
                                   Text(
-                                    'PLAYERS TURN',
+                                    "${you['username']}'s TURN",
                                     style: TextStyle(
                                       fontSize: 40,
                                       foreground: Paint()
@@ -375,8 +585,8 @@ class _GameScreenState extends State<GameScreen> {
                                     ),
                                   ),
                                   Text(
-                                    'PLAYERS TURN',
-                                    style: TextStyle(
+                                    "${you['username']}'s TURN",
+                                    style: const TextStyle(
                                       fontSize: 40,
                                       color: Colors.blue
                                     ),
@@ -387,7 +597,7 @@ class _GameScreenState extends State<GameScreen> {
                           ),
                 
                           BeatAnimation(
-                            bpm: 160,
+                            bpm: bpmMap[widget.map]![0],
                             scaleAmount: currentPhase != 0 ? 1 + currentPhase * 0.1 : 1,
                             subdivision: 1,
                             child: AnimatedContainer(
@@ -398,7 +608,7 @@ class _GameScreenState extends State<GameScreen> {
                               child: Stack(
                                 children: [
                                   Text(
-                                    'ENEMY TURN',
+                                    "${enemy['username']}'s TURN",
                                     style: TextStyle(
                                       fontSize: 40,
                                       foreground: Paint()
@@ -408,8 +618,8 @@ class _GameScreenState extends State<GameScreen> {
                                     ),
                                   ),
                                   Text(
-                                    'ENEMY TURN',
-                                    style: TextStyle(
+                                    "${enemy['username']}'s TURN",
+                                    style: const TextStyle(
                                       fontSize: 40,
                                       color: Colors.red
                                     ),
@@ -421,24 +631,97 @@ class _GameScreenState extends State<GameScreen> {
                         ],
                       ),
                     ),
+
+
+                    // Column(
+                    //   children: [
+                    //     ElevatedButton(
+                    //       onPressed: () => SoundManager.findSound('${widget.map}_music')!.setVolumeSmooth(0.1), 
+                    //       child: Text('smooth vol to 0.1')
+                    //     ),
+                    //     ElevatedButton(
+                    //       onPressed: () => SoundManager.findSound('${widget.map}_music')!.setVolumeSmooth(1), 
+                    //       child: Text('smooth vol to 1')
+                    //     ),
+                    //   ],
+                    // ),
                 
-                
-                    Visibility(
-                    visible: winner != 0,
-                    child: Container(
-                      width: double.infinity,
-                      height: double.infinity,
-                      color: Color.fromARGB(214, 76, 175, 79),
-                      child: Center(
-                        child: Text(
-                          '${winner == 1 ? 'Player' : 'Enemy'} won the game!',
-                          style: const TextStyle(
-                            fontSize: 60
+                    // Visibility(
+                    //   visible: winner != 0,
+                    //   child: Container(
+                    //     width: double.infinity,
+                    //     height: double.infinity,
+                    //     color: Color.fromARGB(214, 76, 175, 79),
+                    //     child: Center(
+                    //       child: Text(
+                    //         '${winner == 1 ? 'Player' : 'Enemy'} won the game!',
+                    //         style: const TextStyle(
+                    //           fontSize: 60
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
+
+                    Center(
+                      child: Visibility(
+                        visible: pauseMenuOpened,
+                        child: Container(
+                          height: MediaQuery.sizeOf(context).height * 0.7,
+                          width: MediaQuery.sizeOf(context).width * 0.4,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(60),
+                            color: Colors.amber,
                           ),
-                        ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text(
+                                'Pause Menu',
+                                style: TextStyle(
+                                  fontSize: 40
+                                ),
+                              ),
+
+                              for(List button in [
+                                ['Resume', () => setState(() => pauseMenuOpened = false)],
+                                ['Quit', () => leaveGame()],
+                              ])
+                                JumpOnHover(
+                                  child: Container(
+                                    width: 400,
+                                    height: 100,
+                                    margin: const EdgeInsets.all(10),
+                                    child: ElevatedButton(
+                                      onPressed: button[1], 
+                                      child: Text(
+                                        button[0],
+                                        style: const TextStyle(
+                                          fontSize: 20
+                                        ),
+                                      )
+                                    ),
+                                  ),
+                                ),
+
+                              const SizedBox(height: 20,),
+
+                              const Text('Music Volume'),
+                              Slider(
+                                value: SoundManager.globalVolume, 
+                                onChanged: (value) => setState(() => SoundManager.setGlobalVolume(value))
+                              ),
+
+                              const Text('SFX Volume'),
+                              Slider(
+                                value: SoundManager.globalSFXVolume, 
+                                onChanged: (value) => setState(() => SoundManager.setSFXVolume(value))
+                              ),
+                            ],
+                          ),
+                        )
                       ),
                     ),
-                  )
                   ],
                 ),
               ),
@@ -449,3 +732,4 @@ class _GameScreenState extends State<GameScreen> {
     );
   }
 }
+

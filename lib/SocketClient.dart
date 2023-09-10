@@ -21,6 +21,9 @@ class SocketClient {
       });
 
       _socket!.on('connect', (_) {
+
+        if(_socket == null) return;
+
         _socket!.emit('playerInformation', {
           'username': username,
           'picture': picture,
@@ -53,6 +56,10 @@ class SocketClient {
     }
   }
 
+  static void changeMap(String name) {
+    _socket!.emit('changemap', name);
+  }
+
   static void makeMove(int global, int local) {
     _socket!.emit('playermove', [global, local]);
   }
@@ -80,8 +87,6 @@ class SocketClient {
     // _nodeProcess = await Process.start('node', ['server/server.js']);
 
     // print('node process started!');
-
-
 
     if (!await GameServer.startServer()) {
       return false;
@@ -116,10 +121,13 @@ class SocketClient {
 
   }
 
-  static Future<bool> joinLocalLobby(String username, int picture, String ip) async {
+  static Future<bool> joinLocalLobby(String username, int picture, String ip, Function(bool) callback) async {
     late bool result;
     
-    if(_socket == null) result = await connect(ip, username, picture);
+
+    result = await connect(ip, username, picture);
+
+    callback(result);
 
     if(result) {
       _socket!.emit('joinlobby', {'data': username});

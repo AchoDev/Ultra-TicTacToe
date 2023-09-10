@@ -145,7 +145,7 @@ class _JoinServerScreenState extends State<JoinServerScreen> {
                   child: Wrap(
                     alignment: WrapAlignment.center,
                     children: [
-                      for(int i = 0; i < 55; i++)
+                      for(int i = 0; i < 82; i++)
                         _SelectablePicture(id: i + 1, isSelected: i + 1 == selectedPicture, selectPicture: selectPicture,)
                     ],
                   ),
@@ -176,7 +176,43 @@ class _JoinServerScreenState extends State<JoinServerScreen> {
                         return;
                       }
     
-                      SocketClient.joinLocalLobby(usernameController.text, selectedPicture, ipController.text,);
+                      SocketClient.joinLocalLobby(usernameController.text, selectedPicture, ipController.text, (isConnected) {
+                        Navigator.of(context).pop();
+    
+                        if(isConnected) {
+                          widget.changePage(1, 3);
+                          widget.lobbyKey.currentState!.listenForServer();
+                        }
+    
+                        else raiseError('Connection Error');
+                      });
+
+                      showDialog(
+                        barrierDismissible: false,
+                        context: context, 
+                        builder: (context) {
+                          return AlertDialog(
+                            title: const Text('Joining Server'),
+                            
+                            content: const SizedBox(
+                              height: 300,
+                              child: Center(
+                                child: CircularProgressIndicator(), 
+                              ),
+                            ),
+                            actions: [
+                              FilledButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  SocketClient.stopConnection();
+                                },
+    
+                                child: const Text('Cancel')
+                              ),
+                            ],
+                          );
+                        }
+                      );
                       // Navigator.of(context).push(MaterialPageRoute(builder: (context) => Lobby()));
                     }, 
                     child: const Text('Join')

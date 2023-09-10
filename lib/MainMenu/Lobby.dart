@@ -55,13 +55,17 @@ class LobbyState extends State<Lobby> {
         },
         // TODO change back to enemy when done with design
         'enemy': {
-          'username': you!.username,
-          'picture': you!.picture,
-          'isHost': you!.isHost,
+          'username': enemy!.username,
+          'picture': enemy!.picture,
+          'isHost': enemy!.isHost,
         },
         'map': selectedMap,
-      },))
+      },
+      changePage: widget.changePage,
+      ))
     ));
+
+    SocketClient.listenFor('changemap', (p0) => setState(() => selectedMap = p0));
 
     SocketClient.listenFor('gameinformation', (information) {
 
@@ -99,6 +103,10 @@ class LobbyState extends State<Lobby> {
     });
 
     SocketClient.listenFor('playerleave', (playerList) {
+      if(enemy != null && enemy!.isHost) {
+        SocketClient.stopConnection(); 
+        widget.changePage(1, 2);
+      }
       setState(() => enemy = null);
     });
   }
@@ -108,11 +116,13 @@ class LobbyState extends State<Lobby> {
   void selectMap(String name) {
     print('$name selected');
     setState(() => selectedMap = name);
+    SocketClient.changeMap(name);
   }
 
   final List maps = [
     'palace',
-    'classroom'
+    'classroom',
+    'night',
   ];
 
   @override
@@ -134,7 +144,7 @@ class LobbyState extends State<Lobby> {
                 child: ElevatedButton(
                   onPressed: () {
                     SocketClient.stopConnection();
-                    widget.changePage(0, 3);
+                    widget.changePage(1, 2);
                   }, 
                   child: const Text('Leave lobby :(')
                 ),
@@ -175,7 +185,7 @@ class LobbyState extends State<Lobby> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     for(String map in maps)
-                      _SelectableMap(selectMap: selectMap, name: map, selected: map == selectedMap,)
+                      _SelectableMap(selectMap: selectMap, name: map, selected: map == selectedMap, isHost: you?.isHost)
                   ],
                 ),
     
@@ -198,7 +208,7 @@ class LobbyState extends State<Lobby> {
                       height: 100,
                       child: ElevatedButton(
                         
-                        onPressed: you != null && you!.isHost ? () {
+                        onPressed: you != null && you!.isHost && enemy != null? () {
                           SocketClient.startGame(selectedMap);
                         } : null,
                     
@@ -227,16 +237,20 @@ class _SelectableMap extends StatelessWidget {
     required this.selectMap,
     required this.name,
     required this.selected,
+
+    required this.isHost,
   });
 
   final Function(String) selectMap;
   final String name;
   final bool selected;
 
+  final bool? isHost;
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => selectMap(name),
+      onTap: () => {if(isHost != null && isHost!) selectMap(name)},
       child: JumpOnHover(
         scaleAmount: 1.1,
         child: ClipRRect(

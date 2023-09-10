@@ -23,40 +23,50 @@ class PlayScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           
           children: [
-            ElevatedButton(
-              onPressed: () => changePage(1, 0),
-              child: Text('back')
+            SizedBox(
+              width: 400,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: () => changePage(1, 0),
+                child: Text('Back')
+              ),
             ),
     
-            FilledButton(
-              onPressed: () => changePage(0, 1),
-              child: Text(
-                'Singleplayer',
-                style: GoogleFonts.pressStart2p(
-                  fontSize: 10
-                ),
-              )
-            ),
+            // FilledButton(
+            //   onPressed: () => changePage(0, 1),
+            //   child: Text(
+            //     'Singleplayer',
+            //     style: GoogleFonts.pressStart2p(
+            //       fontSize: 10
+            //     ),
+            //   )
+            // ),
     
     
-            FilledButton(
-              onPressed: () => changePage(2, 1),
-              child: Text(
-                'Local Multiplayer',
-                style: GoogleFonts.pressStart2p(
-                  fontSize: 10
-                ),
-              )
-            ),
-    
-            FilledButton(
-              onPressed: () => changePage(1, 2),
-              child: Text(
-                'Online Multiplayer',
-                style: GoogleFonts.pressStart2p(
-                  fontSize: 10
-                ),
-              )
+            // FilledButton(
+            //   onPressed: () => changePage(2, 1),
+            //   child: Text(
+            //     'Local Multiplayer',
+            //     style: GoogleFonts.pressStart2p(
+            //       fontSize: 10
+            //     ),
+            //   )
+            // ),
+
+            const SizedBox(height: 30,),
+
+            SizedBox(
+              width: 400,
+              height: 50,
+              child: FilledButton(
+                onPressed: () => changePage(1, 2),
+                child: Text(
+                  'Online Multiplayer',
+                  style: GoogleFonts.pressStart2p(
+                    fontSize: 10
+                  ),
+                )
+              ),
             ),
           ],
         ),

@@ -34,7 +34,11 @@ class GameServer {
           if(socket == _players[0].socket) {io.emit('hoststartgame', data);}
         });
 
-        socket.on('changeMap', (String data) {
+        socket.on('playermove', (res) {
+          io.emit('playermove', res);
+        });
+
+        socket.on('changeMap', (data) {
           currentMap = data;
 
           socket.broadcast.emit('hostchangedmap', data);
@@ -50,6 +54,8 @@ class GameServer {
             socket: socket,
             isHost: isHost,
           ));
+
+          print('sending gameinfo');
 
           socket.emit('gameinformation', {
               'you': {
@@ -73,7 +79,7 @@ class GameServer {
           });
         });
 
-        socket.on('disconnect', () {
+        socket.on('disconnect', (data) {
           _players.removeWhere((player) => player.socket == socket);
           socket.broadcast.emit('playerleave', [
             for(_Player player in _players)
@@ -90,6 +96,7 @@ class GameServer {
 
       return true;
     } catch(e) {
+      stopServer();
       return false;
     }
   }

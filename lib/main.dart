@@ -16,7 +16,7 @@ import 'MainMenu/CreditsScreen.dart';
 import 'MainMenu/SettingsScreen.dart';
 
 import 'MainMenu/LocalMultiplayerScreen.dart';
-import 'MainMenu/PlayScreen.dart';
+import 'MainMenu/PlayScreen.dart'; 
 import 'MainMenu/SingleplayerScreen.dart';
 
 import 'MainMenu/SetupScreen.dart';
@@ -106,14 +106,13 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
 
     _backgroundController.repeat();
 
-    // SoundManager.addSound('menumusic').play(loop: false);
+    SoundManager.addSound('menumusic').play(loop: true);
   }
 
   @override
   void dispose() {
-    super.dispose();
-
     _backgroundController.dispose();
+    super.dispose();
   }
 
   late AnimationController _backgroundController;
@@ -232,6 +231,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                       
                     SettingsScreen(
                       changePage: changePage,
+                      turnBackgroundOff: turnBackgroundOff,
                     )
 
                     // JoinServerScreen(changePage: changePage,),
@@ -370,15 +370,6 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                 ],
               ),
-          
-              ElevatedButton(
-                onPressed: () => SoundManager.stopSound('menumusic'), 
-                child: const Text('stop music')
-              ),
-              ElevatedButton(
-                onPressed: () => widget.turnBackgroundOff(), 
-                child: const Text('turn background off')
-              ),
             ],
           ),
       ),
@@ -416,7 +407,7 @@ class _MenuButtonState extends State<_MenuButton> {
       child: GestureDetector(
         onTap: () => setState(() => widget.changePage(widget.pageX, widget.pageY)),
         child: SizedBox(
-          width: 300,
+          width: MediaQuery.sizeOf(context).width * 0.15,
           child: AnimatedScale(
             
             scale: hovered ? 1.3 : 1,
@@ -451,7 +442,7 @@ class _LogoState extends State<Logo> with SingleTickerProviderStateMixin{
 
     _titleController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: (60000 / 175 ~/ 2))
+      duration: const Duration(milliseconds: (60000 / 170 ~/ 2))
     );
 
     _scaleAnimation = Tween<double>(begin: 1, end: 1.4).animate(
@@ -478,9 +469,9 @@ class _LogoState extends State<Logo> with SingleTickerProviderStateMixin{
       builder: (context, child) {
         return Transform.scale(
           scale: _scaleAnimation.value,
-          child: const SizedBox(
-            width: 500,
-            child: Image(image: AssetImage('assets/images/logo.png'))
+          child: SizedBox(
+            width: MediaQuery.sizeOf(context).width * 0.3,
+            child: const Image(image: AssetImage('assets/images/logo.png'))
           ),
         );
       }
